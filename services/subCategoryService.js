@@ -2,6 +2,8 @@ const SubCategoryModel = require('../models/subCategoryModel');
 const slugify = require('slugify');
 const asyncHandler = require('express-async-handler');
 const ApiError = require('../utils/apiError');
+const ApiFeatures = require('../utils/apiFeatures');
+const factory = require('./handlersFactory');
 
 //Middleware to set categoryId from params
 exports.setCategoryIdFromParams = (req,res,next) => {
@@ -30,11 +32,17 @@ exports.createFilterObject = (req,res,next)=>{
 // @route  GET /api/v1/subCategories
 // @access Public
 exports.getSubCategories = asyncHandler( async (req,res) => {
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 50;
-    const skip = (page - 1) * limit;    
-    const subCategories = await SubCategoryModel.find(req.filteredObject ).skip(skip).limit(limit).populate({ path:'category', select : 'name'});
-    res.status(200).json({results:subCategories.length, page, data: subCategories});
+    const countDocuments = await SubCategoryModel.countDocuments();
+    const apiFeatures = new ApiFeatures(SubCategoryModel.find(), req.query)
+        .filter()
+        .paginate(countDocuments)
+        .sort()
+        .fieldLimiting()
+        .search();
+    // Execute the query
+    const { mongooseQuery, paginationResult } = apiFeatures;
+    const subCategories = await mongooseQuery;
+    res.status(200).json({results:subCategories.length, paginationResult, data: subCategories});
     });
     
     
@@ -67,11 +75,4 @@ exports.updateSubCategory = asyncHandler(async (req,res,next)=>{
 // @desc   Delete a SubCategory
 // @route  DELETE /api/v1/subCategories/:id
 // @access Private
-exports.deleteSubCategory = asyncHandler( async (req,res, next)=>{
-    const { id } = req.params;
-    const subCategory = await SubCategoryModel.findByIdAndDelete(id);
-    if(!subCategory){
-    return next(new ApiError(`SubCategory not found with id of ${id}`, 404));
-    }
-    res.status(204).send();
-    });    
+exports.deleteSubCategory = factory.deleteOne(SubCategoryModel);   

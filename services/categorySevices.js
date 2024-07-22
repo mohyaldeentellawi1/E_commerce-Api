@@ -2,17 +2,25 @@ const CategoryModel = require('../models/categoryModel');
 const slugify = require('slugify');
 const asyncHandler = require('express-async-handler');
 const ApiError = require('../utils/apiError');
+const ApiFeatures = require('../utils/apiFeatures');
+const factory = require('./handlersFactory');
 
 
 // @desc   Get all categories
 // @route  GET /api/v1/categories
 // @access Public
 exports.getCategories = asyncHandler( async (req,res) => {
-const page = req.query.page * 1 || 1;
-const limit = req.query.limit * 1 || 50;
-const skip = (page - 1) * limit;    
-const categories = await CategoryModel.find({}).skip(skip).limit(limit);
-res.status(200).json({results:categories.length, page,data: categories });
+    const countDocuments = await CategoryModel.countDocuments();
+    const apiFeatures = new ApiFeatures(CategoryModel.find(), req.query)
+        .filter()
+        .paginate(countDocuments)
+        .sort()
+        .fieldLimiting()
+        .search();
+    // Execute the query
+    const { mongooseQuery, paginationResult } = apiFeatures;
+    const categories = await mongooseQuery;
+res.status(200).json({results:categories.length, paginationResult, data: categories });
 });
 
 
@@ -53,11 +61,4 @@ res.status(200).json({data: category});
 // @desc   Delete a category
 // @route  DELETE /api/v1/categories/:id
 // @access Private
-exports.deleteCategory = asyncHandler( async (req,res, next)=>{
-const { id } = req.params;
-const category = await CategoryModel.findByIdAndDelete(id);
-if(!category){
-return next(new ApiError(`Category not found with id of ${id}`, 404));
-}
-res.status(204).send();
-});
+exports.deleteCategory = factory.deleteOne(CategoryModel);

@@ -3,6 +3,7 @@ const slugify = require('slugify');
 const asyncHandler = require('express-async-handler');
 const ApiFeatures = require('../utils/apiFeatures');
 const ApiError = require('../utils/apiError');
+const factory = require('./handlersFactory');
 
 
 // @desc   Get all products
@@ -16,18 +17,20 @@ exports.getProducts = asyncHandler( async (req,res) => {
 // 5. Searching
 
 // Build the query
+const countDocuments = await ProductModel.countDocuments();
 const apiFeatures = new ApiFeatures(ProductModel.find(), req.query)
     .filter()
-    .paginate()
+    .paginate(countDocuments)
     .sort()
     .fieldLimiting()
-    .search();
+    .search("Product");
 
 //populate({path:'category', select:'name'})
 // Execute the query
-const products = await apiFeatures.mongooseQuery;
+const { mongooseQuery, paginationResult } = apiFeatures;
+const products = await mongooseQuery;
 
-res.status(200).json({results:products.length ,data: products });
+res.status(200).json({results:products.length , paginationResult, data: products });
 });
 
 
@@ -70,11 +73,4 @@ exports.updateProduct = asyncHandler(async (req,res,next)=>{
 // @desc   Delete a product
 // @route  DELETE /api/v1/products/:id
 // @access Private
-exports.deleteProduct = asyncHandler( async (req,res, next)=>{
-    const { id } = req.params;
-    const product = await ProductModel.findByIdAndDelete(id);
-    if(!product){
-    return next(new ApiError(`Product not found with id of ${id}`, 404));
-    }
-    res.status(204).send();
-    });
+exports.deleteProduct = factory.deleteOne(ProductModel);
