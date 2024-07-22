@@ -31,7 +31,7 @@ exports.createFilterObject = (req,res,next)=>{
 // @access Public
 exports.getSubCategories = asyncHandler( async (req,res) => {
     const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 20;
+    const limit = req.query.limit * 1 || 50;
     const skip = (page - 1) * limit;    
     const subCategories = await SubCategoryModel.find(req.filteredObject ).skip(skip).limit(limit).populate({ path:'category', select : 'name'});
     res.status(200).json({results:subCategories.length, page, data: subCategories});

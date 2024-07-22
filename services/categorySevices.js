@@ -9,7 +9,7 @@ const ApiError = require('../utils/apiError');
 // @access Public
 exports.getCategories = asyncHandler( async (req,res) => {
 const page = req.query.page * 1 || 1;
-const limit = req.query.limit * 1 || 20;
+const limit = req.query.limit * 1 || 50;
 const skip = (page - 1) * limit;    
 const categories = await CategoryModel.find({}).skip(skip).limit(limit);
 res.status(200).json({results:categories.length, page,data: categories });

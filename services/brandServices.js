@@ -9,7 +9,7 @@ const ApiError = require('../utils/apiError');
 // @access Public
 exports.getBrands = asyncHandler( async (req,res) => {
 const page = req.query.page * 1 || 1;
-const limit = req.query.limit * 1 || 5;
+const limit = req.query.limit * 1 || 50;
 const skip = (page - 1) * limit;    
 const brands = await BrandModel.find({}).skip(skip).limit(limit);
 res.status(200).json({results:brands.length, page,data: brands });

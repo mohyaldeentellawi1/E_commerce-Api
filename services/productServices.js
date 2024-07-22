@@ -8,10 +8,24 @@ const ApiError = require('../utils/apiError');
 // @route  GET /api/v1/products
 // @access Public
 exports.getProducts = asyncHandler( async (req,res) => {
+ // 1. Filtering    
+const queryStringObj = {...req.query}; // copy the query string object from  reference
+const excludedFields = ['page', 'sort', 'limit', 'fields'];    
+excludedFields.forEach(field => delete queryStringObj[field]);
+let queryString = JSON.stringify(queryStringObj);
+queryString = queryString.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`); // add $ sign before gte, gt, lte, lt
+
+// 2. Pagination
 const page = req.query.page * 1 || 1;
-const limit = req.query.limit * 1 || 20;
+const limit = req.query.limit * 1 || 50;
 const skip = (page - 1) * limit;    
-const products = await ProductModel.find({}).skip(skip).limit(limit).populate({path:'category', select:'name'});
+
+// Build the query
+const mongooseQuery = ProductModel.find(JSON.parse(queryString)).skip(skip).limit(limit).populate({path:'category', select:'name'});
+
+// Execute the query
+const products = await mongooseQuery;
+
 res.status(200).json({results:products.length, page,data: products });
 });
 
