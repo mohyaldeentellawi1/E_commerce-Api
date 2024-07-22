@@ -21,7 +21,26 @@ const limit = req.query.limit * 1 || 50;
 const skip = (page - 1) * limit;    
 
 // Build the query
-const mongooseQuery = ProductModel.find(JSON.parse(queryString)).skip(skip).limit(limit).populate({path:'category', select:'name'});
+let mongooseQuery = ProductModel.find(JSON.parse(queryString)).skip(skip).limit(limit).populate({path:'category', select:'name'});
+
+// 3. Sorting
+if(req.query.sort){
+    // price , -sold => ['price', '-sold'] => price -sold
+    const sortBy = req.query.sort.split(',').join(' ');
+    mongooseQuery = mongooseQuery.sort(sortBy);
+} else {
+    mongooseQuery = mongooseQuery.sort('-createdAt');
+}
+
+// 4. Field limiting
+if(req.query.fields){
+    const fields = req.query.fields.split(',').join(' ');
+    mongooseQuery = mongooseQuery.select(fields);
+} else {
+    mongooseQuery = mongooseQuery.select('-__v');
+
+}
+
 
 // Execute the query
 const products = await mongooseQuery;
