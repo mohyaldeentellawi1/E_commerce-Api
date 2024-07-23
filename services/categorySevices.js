@@ -48,15 +48,7 @@ res.status(201).json({data: category})
 // @desc   Update a category
 // @route  PUT /api/v1/categories/:id
 // @access Private
-exports.updateCategory = asyncHandler(async (req,res,next)=>{
-const { id } = req.params;
-const { name } = req.body;
-const category = await CategoryModel.findOneAndUpdate({_id:id},{name , slug:slugify(name)} ,{new:true});
-if(!category){
-return next(new ApiError(`Category not found with id of ${id}`, 404));
-}
-res.status(200).json({data: category});
-});
+exports.updateCategory = factory.updateOne(CategoryModel);
 
 // @desc   Delete a category
 // @route  DELETE /api/v1/categories/:id

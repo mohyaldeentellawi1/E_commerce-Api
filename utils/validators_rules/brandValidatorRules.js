@@ -1,7 +1,10 @@
 const { check  } = require('express-validator'); 
 const BrandModel = require('../../models/brandsModel');
 const ApiError = require('../../utils/apiError');
+const slugify = require('slugify');
 const validatorMiddleware = require('../../middleware/validatorMiddleware');
+
+let counter = 0;
 
 exports.getBrandValidator = [
     check('id').isMongoId().withMessage('Invalid Brand Id'),
@@ -34,7 +37,11 @@ exports.updateBrandValidator = [
         );
         }
         return true;
-    })),
+    }))
+    .custom((val , {req})=>{
+        req.body.slug = slugify(val);
+        return true;
+    }),
     validatorMiddleware,
 ];
 

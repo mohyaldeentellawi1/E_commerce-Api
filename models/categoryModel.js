@@ -14,7 +14,7 @@ const categorySchema = new mongoose.Schema({
     },
     slug: {
         type: String,
-        lowercase: true,
+        // lowercase: true,
     },
     image: String,
 }, {timestamps: true});

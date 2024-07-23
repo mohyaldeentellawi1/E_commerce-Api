@@ -3,6 +3,7 @@ const ProductModel = require('../../models/productModel');
 const CategoryModel = require('../../models/categoryModel');
 const SubCategoryModel = require('../../models/subCategoryModel');
 const ApiError = require('../../utils/apiError');
+const slugify = require('slugify');
 const validatorMiddleware = require('../../middleware/validatorMiddleware');
 
 exports.createProductValidator = [
@@ -91,7 +92,10 @@ exports.updateProductValidator = [
         throw new ApiError('Title already exists', 400);
         }
         return true;
-    })),
+    })).custom((val , {req})=>{
+        req.body.slug = slugify(val);
+        return true;
+    }),
     check('description').optional()
     .isLength({ max: 2000 }).withMessage('Product Description should be at most 2000 characters'),
     check('quantity').optional()

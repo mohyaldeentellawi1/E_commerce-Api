@@ -1,6 +1,7 @@
 const { check  } = require('express-validator'); 
 const CategoryModel = require('../../models/categoryModel');
 const ApiError = require('../../utils/apiError');
+const slugify = require('slugify');
 const validatorMiddleware = require('../../middleware/validatorMiddleware');
 
 exports.getCategoryValidator = [
@@ -36,7 +37,11 @@ exports.updateCategoryValidator = [
             );
             }
             return true;
-        })),
+        }))
+        .custom((val , {req})=>{
+            req.body.slug = slugify(val);
+            return true;
+        }),
     validatorMiddleware,
 ];
 
