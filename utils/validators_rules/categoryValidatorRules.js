@@ -21,7 +21,11 @@ exports.createCategoryValidator = [
         );
         }
         return true;
-    })),
+    }))
+    .custom((val , {req})=>{
+        req.body.slug = slugify(val);
+        return true;
+    }),
     validatorMiddleware,
 ];
 

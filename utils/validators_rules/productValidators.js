@@ -17,7 +17,11 @@ exports.createProductValidator = [
         );
         }
         return true;
-    })),
+    }))
+    .custom((val , {req})=>{
+        req.body.slug = slugify(val);
+        return true;
+    }),
     check('description').notEmpty().withMessage('Product Description is required')
     .isLength({ max: 2000 }).withMessage('Product Description should be at most 2000 characters'),
     check('quantity').notEmpty().withMessage('Product Quantity is required')

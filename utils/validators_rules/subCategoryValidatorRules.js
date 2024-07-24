@@ -19,7 +19,11 @@ exports.createSubcategoryValidator = [
             return Promise.reject(new ApiError('Name already exists in this category', 400));
         }
         return true
-    })),
+    }))
+    .custom((val , {req})=>{
+        req.body.slug = slugify(val);
+        return true;
+    }),
     check('category').notEmpty().withMessage('Category is required')
     .isMongoId().withMessage('Invalid Category Id')
     ,
