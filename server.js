@@ -1,4 +1,4 @@
-
+const path = require('path');
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
@@ -19,6 +19,7 @@ dbConnection();
 
 // Middlewares
 app.use(express.json()); // for parsing json data
+app.use(express.static(path.join(__dirname, 'uploads'))); // for serving static files
 if(process.env.NODE_ENV === 'development') {
 app.use(morgan('dev')); // Request logger
 console.log(`mode : ${process.env.NODE_ENV}`);
@@ -29,6 +30,7 @@ app.use("/api/v1/categories", categoryRoute);
 app.use("/api/v1/subCategory", subCategoryRoute);
 app.use('/api/v1/brands',brandsRoute);
 app.use('/api/v1/products',productRoute);
+
 
 //create error middleware for invalid route
 app.all('*',(req,res,next)=>{

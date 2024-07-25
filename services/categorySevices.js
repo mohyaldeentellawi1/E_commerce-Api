@@ -1,11 +1,10 @@
 const CategoryModel = require('../models/categoryModel');
-const multer = require('multer');
-const AppError = require('../utils/apiError');
+const factory = require('./handlersFactory');
+const asyncHandler = require('express-async-handler');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
-const factory = require('./handlersFactory');
-const ApiError = require('../utils/apiError');
-const asyncHandler = require('express-async-handler');
+const {uploadSingleImage} = require('../middleware/uploadImageMiddleware');
+
 
 
 // @desc   Get all categories
@@ -34,44 +33,27 @@ exports.updateCategory = factory.updateOne(CategoryModel);
 // @access Private
 exports.deleteCategory = factory.deleteOne(CategoryModel);
 
+//upload category image
+exports.uploadCategoryImage = uploadSingleImage('image');
 
-// Disk Storage Engine
-// const multerStorage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, 'uploads/categories');
-//     },
-//     filename: (req, file, cb) => {
-//         const ext = file.mimetype.split('/')[1];
-//         const fileName = `category-${uuidv4()}-${Date.now()}.${ext}`;
-//         cb(null, fileName);
-//     }
-// });
-
-
-// memory storage engine as buffer
-const multerStorage = multer.memoryStorage();
-
-// Multer Filter
-const multerFilter = (req, file, cb) => {
-    if(file.mimetype.startsWith('image')){
-        cb(null, true);
-    } else{
-        cb(new ApiError('Not an image! Please upload only images.', 400), false);
-    }
-};
-// @desc upload category image
-// @route  POST /api/v1/categories
-// @access Private
-const upload = multer({ storage: multerStorage ,fileFilter: multerFilter});
-exports.uploadCategoryImage = upload.single('image');
-
-// Process uploaded image
+//image processing
 exports.imageProcessing = asyncHandler( async (req, res, next) => {
-        const fileName = `category-${uuidv4()}-${Date.now()}.jpeg`;
-    await sharp(req.file.buffer)
-        .resize(600, 600)
-        .toFormat('jpeg')
-        .jpeg({ quality: 90 })
-        .toFile(`uploads/categories/${fileName}`);
-        next();
-    });
+    const fileName = `category-${uuidv4()}-${Date.now()}.jpeg`;
+await sharp(req.file.buffer)
+    .resize(600, 600)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`uploads/categories/${fileName}`);
+    // Save the image name to the request body
+    req.body.image = fileName;
+    next();
+});
+
+
+
+
+
+
+
+
+
