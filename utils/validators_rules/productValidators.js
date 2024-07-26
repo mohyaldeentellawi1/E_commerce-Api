@@ -40,7 +40,7 @@ exports.createProductValidator = [
         return true;
     }),
     check('colors').optional().isArray().withMessage('Product Colors should be an array'),
-    check('imageCovor').notEmpty().withMessage('Product Image is required'),
+    check('imageCover').notEmpty().withMessage('Product Image is required'),
     check('images').optional().isArray().withMessage('Product Images should be an array'),
     check('category').notEmpty().withMessage('Product Category is required')
     .isMongoId().withMessage('Invalid Id Format')
@@ -118,7 +118,7 @@ exports.updateProductValidator = [
         return true;
     }),
     check('colors').optional().isArray().withMessage('Product Colors should be an array'),
-    check('imageCovor').optional(),
+    check('imageCover').optional(),
     check('images').optional().isArray().withMessage('Product Images should be an array'),
     check('category').optional()
     .isMongoId().withMessage('Invalid Id Format'),

@@ -32,7 +32,7 @@ exports.createBrandValidator = [
 
 exports.updateBrandValidator = [   
     check('id').isMongoId().withMessage('Invalid Brand Id'),
-    check('name').notEmpty().withMessage('Brand Name is required')
+    check('name').optional()
     .isString().withMessage('Brand Name should be a string')
     .custom((name)=>BrandModel.findOne({name}).then((name)=>{
         if(name) {

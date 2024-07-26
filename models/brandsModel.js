@@ -21,6 +21,22 @@ const BrandSchema = new mongoose.Schema({
 {timestamps: true},
 );
 
+// update , delete, get , getALL
+BrandSchema.post('init', (doc)=>{
+    if(doc.image){
+        const imageUrl = `${process.env.BASE_URL}/brands/${doc.image}`;
+        doc.image = imageUrl;
+    }
+});
+
+// create
+BrandSchema.post('save', (doc)=>{
+    if(doc.image){
+        const imageUrl = `${process.env.BASE_URL}/brands/${doc.image}`;
+        doc.image = imageUrl;
+    }
+});
+
 
 
 // Create a Model

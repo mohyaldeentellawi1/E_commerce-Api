@@ -39,7 +39,7 @@ const productSchema = new mongoose.Schema({
         default: 0
     },
     colors:[String],
-    imageCovor:{
+    imageCover:{
         type: String,
         required: [true, 'Product image is required'],
     },
@@ -76,6 +76,38 @@ productSchema.pre(/^find/, function(next){
         select: 'name -_id'
     });
     next();
+});
+
+// update , delete, get , getALL
+productSchema.post('init', (doc)=>{
+    if(doc.imageCover){
+        const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
+        doc.imageCover = imageUrl;
+    }
+    if(doc.images){
+        const images = [];
+        doc.images.forEach((image)=>{
+            const imageUrl = `${process.env.BASE_URL}/products/${image}`;
+            images.push(imageUrl);
+        });
+        doc.images = images;
+    }
+});
+
+// create
+productSchema.post('save', (doc)=>{
+    if(doc.imageCover){
+        const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
+        doc.imageCover = imageUrl;
+    }
+    if(doc.images){
+        const images = [];
+        doc.images.forEach((image)=>{
+            const imageUrl = `${process.env.BASE_URL}/products/${image}`;
+            images.push(imageUrl);
+        });
+        doc.images = images;
+    }
 });
 
 const ProductModel = mongoose.model('Product', productSchema);

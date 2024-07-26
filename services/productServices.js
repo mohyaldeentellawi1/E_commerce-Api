@@ -1,6 +1,58 @@
 const ProductModel = require('../models/productModel');
+const ApiError = require('../utils/apiError');
+const multer = require('multer');
+const asyncHandler = require('express-async-handler');
+const sharp = require('sharp');
+const { v4: uuidv4 } = require('uuid');
 const factory = require('./handlersFactory');
 
+
+
+// memory storage engine as buffer
+const multerStorage = multer.memoryStorage();
+ // Multer Filter
+const multerFilter = (req, file, cb) => {
+        if(file.mimetype.startsWith('image')){
+            cb(null, true);
+        } else {
+            cb(new ApiError('Not an image! Please upload only images.', 400), false);
+        } 
+};
+const upload = multer({ storage: multerStorage ,fileFilter: multerFilter});
+
+exports.uploadProductImages = upload.fields([
+    { name: 'imageCover', maxCount: 1 },
+    { name: 'images', maxCount: 5 },
+]);
+
+// @desc   Image processing for image cover
+exports.productImageProcessing = asyncHandler(async (req, res, next) => {
+    if(req.files.imageCover){
+        const imageCoverFileName = `product-${uuidv4()}-${Date.now()}-cover.jpeg`;
+    await sharp(req.files.imageCover[0].buffer)
+    .resize(2000,1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 95 })
+    .toFile(`uploads/products/${imageCoverFileName}`);
+    // Save the image cover name in Database
+        req.body.imageCover = imageCoverFileName;
+    }
+    if(req.files.images) {
+        req.body.images = [];
+        await Promise.all(
+            req.files.images.map(async(image,index)=>{
+                const imageName = `product-${uuidv4()}-${Date.now()}-${index+1}.jpeg`;
+                await sharp(image.buffer)
+                    .resize(2000,1333)
+                    .toFormat('jpeg')
+                    .jpeg({ quality: 95 })
+                    .toFile(`uploads/products/${imageName}`);
+                    // Save the images name in Database
+                    req.body.images.push(imageName);
+            }));
+        }
+        next();
+});
 
 // @desc   Get all products
 // @route  GET /api/v1/products
@@ -26,3 +78,6 @@ exports.updateProduct = factory.updateOne(ProductModel);
 // @route  DELETE /api/v1/products/:id
 // @access Private
 exports.deleteProduct = factory.deleteOne(ProductModel);
+
+
+
