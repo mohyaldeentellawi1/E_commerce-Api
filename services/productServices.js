@@ -1,31 +1,17 @@
 const ProductModel = require('../models/productModel');
-const ApiError = require('../utils/apiError');
-const multer = require('multer');
 const asyncHandler = require('express-async-handler');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
+const {uploadMultipleImages} = require('../middleware/uploadImageMiddleware');
 const factory = require('./handlersFactory');
 
 
-
-// memory storage engine as buffer
-const multerStorage = multer.memoryStorage();
- // Multer Filter
-const multerFilter = (req, file, cb) => {
-        if(file.mimetype.startsWith('image')){
-            cb(null, true);
-        } else {
-            cb(new ApiError('Not an image! Please upload only images.', 400), false);
-        } 
-};
-const upload = multer({ storage: multerStorage ,fileFilter: multerFilter});
-
-exports.uploadProductImages = upload.fields([
+exports.uploadProductImages = uploadMultipleImages([
     { name: 'imageCover', maxCount: 1 },
     { name: 'images', maxCount: 5 },
 ]);
 
-// @desc   Image processing for image cover
+// @desc   Image processing for image cover and images for product
 exports.productImageProcessing = asyncHandler(async (req, res, next) => {
     if(req.files.imageCover){
         const imageCoverFileName = `product-${uuidv4()}-${Date.now()}-cover.jpeg`;
