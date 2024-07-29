@@ -43,6 +43,22 @@ const UserSchema = new mongoose.Schema({
 {timestamps: true},
 );
 
+// update , delete, get , getALL
+UserSchema.post('init', (doc)=>{
+    if(doc.profileImage){
+        const imageUrl = `${process.env.BASE_URL}/users/${doc.profileImage}`;
+        doc.profileImage = imageUrl;
+    }
+});
+
+// create
+UserSchema.post('save', (doc)=>{
+    if(doc.profileImage){
+        const imageUrl = `${process.env.BASE_URL}/users/${doc.profileImage}`;
+        doc.profileImage = imageUrl;
+    }
+});
+
 
 const UserModel = mongoose.model('User', UserSchema);
 
