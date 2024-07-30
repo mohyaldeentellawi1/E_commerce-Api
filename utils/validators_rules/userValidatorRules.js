@@ -29,7 +29,14 @@ exports.createUserValidator = [
         return true;
     })),
     check('password').notEmpty().withMessage('User Password is required')
-    .isLength({min:6}).withMessage('Password should be at least 6 characters'),
+    .isLength({min:6}).withMessage('Password should be at least 6 characters')
+    .custom((pass,{req})=>{
+        if(pass !== req.body.confirmPassword){
+            throw new ApiError('Passwords do not match', 400);
+        }
+        return true;
+    }),
+    check('confirmPassword').notEmpty().withMessage('Confirm Password is required'),
     check('phone').optional()
     .isMobilePhone("tr-TR").withMessage('Invalid Phone Number')
     .custom((val)=> {
