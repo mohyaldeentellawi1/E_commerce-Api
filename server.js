@@ -8,7 +8,9 @@ const categoryRoute = require('./routes/categoryRoute');
 const subCategoryRoute = require('./routes/subCategoryRoute');
 const productRoute = require('./routes/productRoute');
 const brandsRoute = require('./routes/brandRoute');
+const authRoute = require('./routes/authRoute');
 const userRoute = require('./routes/userRoute');
+
 const ApiError = require('./utils/apiError');
 const globalError = require('./middleware/errorMiddleware');
 
@@ -32,6 +34,8 @@ app.use("/api/v1/subCategory", subCategoryRoute);
 app.use('/api/v1/brands',brandsRoute);
 app.use('/api/v1/products',productRoute);
 app.use('/api/v1/users',userRoute);
+app.use("/api/v1/auth", authRoute);
+
 
 
 //create error middleware for invalid route
