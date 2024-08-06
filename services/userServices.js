@@ -48,12 +48,12 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
 // @access Private (Admin , User)
 exports.updatePassword = asyncHandler(async (req, res, next) => {
     const user = await UserModel.findByIdAndUpdate(req.params.id,
-        { password: await bcrypt.hash(req.body.password, 10) },
+        { password: await bcrypt.hash(req.body.password, 10), passwordChangedAt: Date.now() },
         { new: true });
-        if(!user){
-            return next(new ApiError(`user not found with id of ${req.params.id}`, 404));
-        }
-        res.status(200).json({ data: user });
+    if (!user) {
+        return next(new ApiError(`user not found with id of ${req.params.id}`, 404));
+    }
+    res.status(200).json({ data: user });
 });
 
 // @desc   Delete a User

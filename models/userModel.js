@@ -23,6 +23,7 @@ const UserSchema = new mongoose.Schema({
         trim: true,
         minlength: [6, 'Too short password'],
     },
+    passwordChangedAt : Date,
     phone: {
         type: String,
         trim: true,
@@ -32,7 +33,7 @@ const UserSchema = new mongoose.Schema({
     },
     role : {
         type: String,
-        enum: ['user', 'admin'],
+        enum: ['user', 'admin', 'manager'],
         default: 'user',
     },
     active: {

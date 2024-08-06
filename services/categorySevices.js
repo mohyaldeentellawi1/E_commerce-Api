@@ -3,7 +3,7 @@ const factory = require('./handlersFactory');
 const asyncHandler = require('express-async-handler');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
-const {uploadSingleImage} = require('../middleware/uploadImageMiddleware');
+const { uploadSingleImage } = require('../middleware/uploadImageMiddleware');
 
 
 
@@ -21,7 +21,7 @@ exports.getCategory = factory.getOne(CategoryModel);
 // @desc   Create a new category
 // @route  POST /api/v1/categories
 // @access Private
-exports.createCategory =  factory.createOne(CategoryModel);
+exports.createCategory = factory.createOne(CategoryModel);
 
 // @desc   Update a category
 // @route  PUT /api/v1/categories/:id
@@ -37,15 +37,17 @@ exports.deleteCategory = factory.deleteOne(CategoryModel);
 exports.uploadCategoryImage = uploadSingleImage('image');
 
 //image processing
-exports.imageProcessing = asyncHandler( async (req, res, next) => {
+exports.imageProcessing = asyncHandler(async (req, res, next) => {
     const fileName = `category-${uuidv4()}-${Date.now()}.jpeg`;
-await sharp(req.file.buffer)
-    .resize(600, 600)
-    .toFormat('jpeg')
-    .jpeg({ quality: 90 })
-    .toFile(`uploads/categories/${fileName}`);
-    // Save the image name to the request body
-    req.body.image = fileName;
+    if (req.file) {
+        await sharp(req.file.buffer)
+            .resize(600, 600)
+            .toFormat('jpeg')
+            .jpeg({ quality: 90 })
+            .toFile(`uploads/categories/${fileName}`);
+        // Save the image name to the request body
+        req.body.image = fileName;
+    }
     next();
 });
 

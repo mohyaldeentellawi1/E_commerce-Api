@@ -1,3 +1,6 @@
+const AppError = require('..//utils/apiError');
+
+const handleJwtInvalidSignature = () => new AppError('Invalid Token. Please login again', 401);
 
 
 const globalError = (error,req,res,next) => {
@@ -6,6 +9,9 @@ const globalError = (error,req,res,next) => {
     if(process.env.NODE_ENV === 'development'){
         sendErrorDev(error,res);
     }  else {
+        if(error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError'){
+            error = handleJwtInvalidSignature();
+        }
         sendErrorProd(error,res);
     }
 };
