@@ -1,6 +1,8 @@
+const crypto = require('crypto');
 const asyncHandler = require('express-async-handler');
 const createToken = require('../middleware/creatTokenMiddleware');
-const ApiError = require('..//utils/apiError');
+const ApiError = require('../utils/apiError');
+const sendEmail = require('../utils/sendEmail');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const UserModel = require('../models/userModel');
@@ -64,4 +66,36 @@ exports.allowTo = (...roles) => asyncHandler(async (req, res, next) => {
         return next(new ApiError('You are not allowed to access this route', 403));
     }
     next();
+});
+
+// @desc  Forget Password 
+// @route POST /api/v1/auth/forget-password
+// @access Public
+exports.forgetPassword = asyncHandler(async (req, res, next) => {
+    const user = await UserModel.findOne({ email: req.body.email });
+    if (!user) {
+        return next(new ApiError('No user found with this email', 404));
+    }
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log(resetCode);
+    const hashedCode = crypto.createHash('sha256').update(resetCode).digest('hex');
+    user.otp = hashedCode;
+    user.otpExpires = Date.now() + 10 * 60 * 1000;
+    user.otpVerified = false;
+    await user.save();
+    const message = `Hi ${user.name},\n We have received a request to reset your password. Please use the following code to reset your password:\n ${resetCode}\n`;
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: 'Password Reset Code (valid for 10 minutes)',
+            message
+        });
+    } catch (error) {
+        user.otp = undefined;
+        user.otpExpires = undefined;
+        user.otpVerified = undefined;
+        await user.save();
+        return next(new ApiError('Email could not be sent', 500));
+    }
+    res.status(200).json({ status: 'success', message: 'Reset Code sent to your email' });
 });

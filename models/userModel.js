@@ -24,6 +24,9 @@ const UserSchema = new mongoose.Schema({
         minlength: [6, 'Too short password'],
     },
     passwordChangedAt : Date,
+    otp: String,
+    otpExpires: Date,
+    otpVerified: Boolean,
     phone: {
         type: String,
         trim: true,
