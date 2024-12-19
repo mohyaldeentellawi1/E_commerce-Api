@@ -1,4 +1,4 @@
-const CategoryModel = require('../models/categoryModel');
+const CategoryM = require('../models/categoryModel');
 const factory = require('./handlersFactory');
 const asyncHandler = require('express-async-handler');
 const sharp = require('sharp');
@@ -10,28 +10,28 @@ const { uploadSingleImage } = require('../middleware/uploadImageMiddleware');
 // @desc   Get all categories
 // @route  GET /api/v1/categories
 // @access Public
-exports.getCategories = factory.getAll(CategoryModel);
+exports.getCategories = factory.getAll(CategoryM);
 
 
 // @desc   Get a specific category
 // @route  GET /api/v1/categories/:id
 // @access Public
-exports.getCategory = factory.getOne(CategoryModel);
+exports.getCategory = factory.getOne(CategoryM);
 
 // @desc   Create a new category
 // @route  POST /api/v1/categories
 // @access Private
-exports.createCategory = factory.createOne(CategoryModel);
+exports.createCategory = factory.createOne(CategoryM);
 
 // @desc   Update a category
 // @route  PUT /api/v1/categories/:id
 // @access Private
-exports.updateCategory = factory.updateOne(CategoryModel);
+exports.updateCategory = factory.updateOne(CategoryM);
 
 // @desc   Delete a category
 // @route  DELETE /api/v1/categories/:id
 // @access Private
-exports.deleteCategory = factory.deleteOne(CategoryModel);
+exports.deleteCategory = factory.deleteOne(CategoryM);
 
 //upload category image
 exports.uploadCategoryImage = uploadSingleImage('image');
