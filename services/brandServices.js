@@ -8,7 +8,7 @@ const { uploadSingleImage } = require("../middleware/uploadImageMiddleware");
 // @desc   Get all Brands
 // @route  GET /api/v1/brands
 // @access Public
-exports.getBrands = factory.getAll(BrandModel);
+exports.getBrands = factory.getAll(BrandModel, "Brand");
 
 // @desc   Get a specific Brand
 // @route  GET /api/v1/brands/:id

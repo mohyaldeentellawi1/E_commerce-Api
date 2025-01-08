@@ -25,7 +25,7 @@ exports.createFilterObject = (req, res, next) => {
 // @desc   Get all SubCategories
 // @route  GET /api/v1/subCategories
 // @access Public
-exports.getSubCategories = factory.getAll(SubCategoryModel);
+exports.getSubCategories = factory.getAll(SubCategoryModel, "SubCategory");
 
 // @desc   Get a specific SubCategory
 // @route  GET /api/v1/subCategories/:id

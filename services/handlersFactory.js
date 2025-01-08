@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
-const ApiError = require("../utils/apiError");
-const ApiFeatures = require("../utils/apiFeatures");
+const ApiError = require("../utils/apiError").default;
+const ApiFeatures = require("../utils/apiFeatures").default;
 const { default: slugify } = require("slugify");
 
 exports.deleteOne = (Model) =>
@@ -16,8 +16,10 @@ exports.deleteOne = (Model) =>
 exports.updateOne = (Model) =>
   asyncHandler(async (req, res, next) => {
     const updateData = { ...req.body };
-    if (req.body.name) {
-      updateData.slug = slugify(req.body.name);
+    const slugField =
+      Model.modelName === "Product" ? req.body.title : req.body.name;
+    if (slugField) {
+      updateData.slug = slugify(slugField);
     }
     const document = await Model.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
@@ -32,9 +34,11 @@ exports.updateOne = (Model) =>
 
 exports.createOne = (Model) =>
   asyncHandler(async (req, res) => {
+    const slugField =
+      Model.modelName === "Product" ? req.body.title : req.body.name;
     const newDocument = await Model.create({
       ...req.body,
-      slug: slugify(req.body.name),
+      slug: slugify(slugField),
     });
     res.status(201).json({ data: newDocument });
   });
@@ -52,15 +56,19 @@ exports.getOne = (Model) =>
 exports.getAll = (Model, modelName = "") =>
   asyncHandler(async (req, res) => {
     const countDocuments = await Model.countDocuments();
-    const apiFeatures = new ApiFeatures(
-      Model.find(req.filteredObject),
-      req.query
-    )
+    const apiFeatures = new ApiFeatures(Model.find(), req.query)
       .filter()
       .paginate(countDocuments)
       .sort()
       .fieldLimiting()
       .search(modelName);
+
+    if (Model.modelName === "Product") {
+      apiFeatures.mongooseQuery = apiFeatures.mongooseQuery.populate({
+        path: "category",
+        select: "name",
+      });
+    }
     // Execute the query
     const { mongooseQuery, paginationResult } = apiFeatures;
     const documents = await mongooseQuery;
