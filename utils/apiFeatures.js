@@ -75,16 +75,6 @@ class ApiFeatures {
     this.paginationResult = pagination;
     return this;
   }
-
-  poPulate(modelName) {
-    if (modelName === "Product") {
-      this.mongooseQuery = this.mongooseQuery.populate({
-        path: "category",
-        select: "name -_id",
-      });
-    }
-    return this;
-  }
 }
 
 export default ApiFeatures;

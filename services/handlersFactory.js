@@ -10,18 +10,14 @@ exports.deleteOne = (Model) =>
     if (!document) {
       return next(new ApiError(`document not found with id of ${id}`, 404));
     }
-    res.status(200).json({ message: "Deleted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: `This ${id} Deleted successfully` });
   });
 
 exports.updateOne = (Model) =>
   asyncHandler(async (req, res, next) => {
-    const updateData = { ...req.body };
-    const slugField =
-      Model.modelName === "Product" ? req.body.title : req.body.name;
-    if (slugField) {
-      updateData.slug = slugify(slugField);
-    }
-    const document = await Model.findByIdAndUpdate(req.params.id, updateData, {
+    const document = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
     if (!document) {
@@ -29,18 +25,19 @@ exports.updateOne = (Model) =>
         new ApiError(`document not found with id of ${req.params.id}`, 404)
       );
     }
-    res.status(200).json({ data: document });
+    res
+      .status(200)
+      .json({ success: true, message: "Updated successfully", data: document });
   });
 
 exports.createOne = (Model) =>
   asyncHandler(async (req, res) => {
-    const slugField =
-      Model.modelName === "Product" ? req.body.title : req.body.name;
-    const newDocument = await Model.create({
-      ...req.body,
-      slug: slugify(slugField),
+    const newDocument = await Model.create(req.body);
+    res.status(201).json({
+      success: true,
+      message: "Created successfully",
+      data: newDocument,
     });
-    res.status(201).json({ data: newDocument });
   });
 
 exports.getOne = (Model) =>
@@ -50,22 +47,24 @@ exports.getOne = (Model) =>
     if (!document) {
       return next(new ApiError(`document not found with id of ${id}`, 404));
     }
-    res.status(200).json({ data: document });
+    res.status(200).json({ success: true, data: document });
   });
 
 exports.getAll = (Model, modelName = "") =>
   asyncHandler(async (req, res) => {
+    let filter = {};
+    if (req.filterObj) {
+      filter = req.filterObj;
+    }
     const countDocuments = await Model.countDocuments();
 
     // Build query
-    const apiFeatures = new ApiFeatures(Model.find(), req.query)
+    const apiFeatures = new ApiFeatures(Model.find(filter), req.query)
       .filter()
       .paginate(countDocuments)
       .sort()
       .fieldLimiting()
-      .search(modelName)
-      .poPulate(modelName);
-
+      .search(modelName);
     // Execute query
     const { mongooseQuery, paginationResult } = apiFeatures;
     const documents = await mongooseQuery;

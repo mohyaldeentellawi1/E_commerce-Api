@@ -4,6 +4,7 @@ const ProductM = require("../../models/productModel");
 const CategoryM = require("../../models/categoryModel");
 const SubCategoryM = require("../../models/subCategoryModel");
 const BrandM = require("../../models/brandsModel");
+const slugify = require("slugify");
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
 
 exports.createProductValidator = [
@@ -13,7 +14,11 @@ exports.createProductValidator = [
     .isLength({ min: 3 })
     .withMessage("Product Title should be at least 3 characters")
     .isString()
-    .withMessage("Product Title should be a string"),
+    .withMessage("Product Title should be a string")
+    .custom((val, { req }) => {
+      req.body.slug = slugify(val);
+      return true;
+    }),
   check("description")
     .notEmpty()
     .withMessage("Product Description is required")
@@ -132,7 +137,11 @@ exports.updateProductValidator = [
     .isLength({ min: 3 })
     .withMessage("Product Title should be at least 3 characters")
     .isString()
-    .withMessage("Product Title should be a string"),
+    .withMessage("Product Title should be a string")
+    .custom((val, { req }) => {
+      req.body.slug = slugify(val);
+      return true;
+    }),
   check("description")
     .optional()
     .isLength({ min: 20 })

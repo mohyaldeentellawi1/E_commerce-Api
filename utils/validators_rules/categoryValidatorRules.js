@@ -1,5 +1,6 @@
 const { check } = require("express-validator");
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
+const slugify = require("slugify");
 
 exports.createCategoryValidator = [
   check("name")
@@ -10,7 +11,11 @@ exports.createCategoryValidator = [
     .isLength({ max: 50 })
     .withMessage("Category Name should be at most 50 characters")
     .isString()
-    .withMessage("Category Name should be a string"),
+    .withMessage("Category Name should be a string")
+    .custom((val, { req }) => {
+      req.body.slug = slugify(val);
+      return true;
+    }),
   validatorMiddleware,
 ];
 
@@ -19,7 +24,11 @@ exports.updateCategoryValidator = [
   check("name")
     .optional()
     .isString()
-    .withMessage("Category Name should be a string"),
+    .withMessage("Category Name should be a string")
+    .custom((val, { req }) => {
+      req.body.slug = slugify(val);
+      return true;
+    }),
   validatorMiddleware,
 ];
 

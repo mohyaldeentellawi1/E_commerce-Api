@@ -1,6 +1,7 @@
 const { check } = require("express-validator");
 const CategoryM = require("../../models/categoryModel");
 const ApiError = require("../../utils/apiError").default;
+const slugify = require("slugify");
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
 
 exports.createSubcategoryValidator = [
@@ -10,7 +11,11 @@ exports.createSubcategoryValidator = [
     .isLength({ min: 2 })
     .withMessage("Subcategory Name should be at least 2 characters")
     .isLength({ max: 50 })
-    .withMessage("Subcategory Name should be at most 50 characters"),
+    .withMessage("Subcategory Name should be at most 50 characters")
+    .custom((val, { req }) => {
+      req.body.slug = slugify(val);
+      return true;
+    }),
   check("category")
     .notEmpty()
     .withMessage("Category is required")
@@ -31,7 +36,11 @@ exports.updateSubcategoryValidator = [
   check("name")
     .optional()
     .isString()
-    .withMessage("Subcategory Name should be a string"),
+    .withMessage("Subcategory Name should be a string")
+    .custom((val, { req }) => {
+      req.body.slug = slugify(val);
+      return true;
+    }),
   check("category")
     .optional()
     .isMongoId()

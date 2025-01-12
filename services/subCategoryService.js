@@ -18,7 +18,7 @@ exports.createFilterObject = (req, res, next) => {
   let filteredObject = {};
   if (req.params.categoryId)
     filteredObject = { category: req.params.categoryId };
-  req.filteredObject = filteredObject;
+  req.filterObj = filteredObject;
   next();
 };
 
