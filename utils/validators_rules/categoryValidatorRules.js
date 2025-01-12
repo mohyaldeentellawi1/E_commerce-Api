@@ -1,11 +1,6 @@
 const { check } = require("express-validator");
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
 
-exports.getCategoryValidator = [
-  check("id").isMongoId().withMessage("Invalid Category Id"),
-  validatorMiddleware,
-];
-
 exports.createCategoryValidator = [
   check("name")
     .notEmpty()
@@ -25,6 +20,11 @@ exports.updateCategoryValidator = [
     .optional()
     .isString()
     .withMessage("Category Name should be a string"),
+  validatorMiddleware,
+];
+
+exports.getCategoryValidator = [
+  check("id").isMongoId().withMessage("Invalid Category Id"),
   validatorMiddleware,
 ];
 
