@@ -43,7 +43,7 @@ class ApiFeatures {
       let query = {};
       if (modelName === "Product") {
         query.$or = [
-          { title: { $regex: this.queryString.keyword, $options: "i" } },
+          { title: { $regex: this.queryString.keyword, $options: "i" } }, // i : For matching keywords in case-insensitive
           { description: { $regex: this.queryString.keyword, $options: "i" } },
         ];
       } else {
@@ -58,13 +58,13 @@ class ApiFeatures {
     const page = this.queryString.page * 1 || 1;
     const limit = this.queryString.limit * 1 || 50;
     const skip = (page - 1) * limit;
-    const endIndex = page * limit;
+    const endPageIndex = page * limit; // For example, if page = 2 and limit = 10, endPageIndex = 20
     const pagination = {};
     pagination.currentPage = page;
     pagination.limit = limit;
-    pagination.numberofPages = Math.ceil(countDocuments / limit);
+    pagination.numberofPages = Math.ceil(countDocuments / limit); // Rounds to an integer
     // next page
-    if (endIndex < countDocuments) {
+    if (endPageIndex < countDocuments) {
       pagination.next = page + 1;
     }
     // previous page
@@ -73,6 +73,16 @@ class ApiFeatures {
     }
     this.mongooseQuery = this.mongooseQuery.skip(skip).limit(limit);
     this.paginationResult = pagination;
+    return this;
+  }
+
+  poPulate(modelName) {
+    if (modelName === "Product") {
+      this.mongooseQuery = this.mongooseQuery.populate({
+        path: "category",
+        select: "name -_id",
+      });
+    }
     return this;
   }
 }

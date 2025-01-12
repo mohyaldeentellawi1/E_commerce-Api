@@ -56,20 +56,17 @@ exports.getOne = (Model) =>
 exports.getAll = (Model, modelName = "") =>
   asyncHandler(async (req, res) => {
     const countDocuments = await Model.countDocuments();
+
+    // Build query
     const apiFeatures = new ApiFeatures(Model.find(), req.query)
       .filter()
       .paginate(countDocuments)
       .sort()
       .fieldLimiting()
-      .search(modelName);
+      .search(modelName)
+      .poPulate(modelName);
 
-    if (Model.modelName === "Product") {
-      apiFeatures.mongooseQuery = apiFeatures.mongooseQuery.populate({
-        path: "category",
-        select: "name",
-      });
-    }
-    // Execute the query
+    // Execute query
     const { mongooseQuery, paginationResult } = apiFeatures;
     const documents = await mongooseQuery;
     res
