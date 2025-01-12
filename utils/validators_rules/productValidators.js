@@ -3,6 +3,7 @@ const ApiError = require("../../utils/apiError").default;
 const ProductM = require("../../models/productModel");
 const CategoryM = require("../../models/categoryModel");
 const SubCategoryM = require("../../models/subCategoryModel");
+const BrandM = require("../../models/brandsModel");
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
 
 exports.createProductValidator = [
@@ -63,7 +64,7 @@ exports.createProductValidator = [
     .custom(async (categoryID) => {
       const category = await CategoryM.findById(categoryID);
       if (!category) {
-        throw new ApiError("Category not found", 404);
+        return Promise.reject(new ApiError("Category not found", 400));
       }
       return true;
     }),
@@ -92,11 +93,23 @@ exports.createProductValidator = [
       });
       const checker = val.every((v) => subCategoriesInDB.includes(v));
       if (!checker) {
-        throw new ApiError("SubCategory not found in this category", 404);
+        return Promise.reject(
+          new ApiError("SubCategory not found in this category", 404)
+        );
       }
       return true;
     }),
-  check("brand").optional().isMongoId().withMessage("Invalid Id Format"),
+  check("brand")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid Id Format")
+    .custom(async (brandID) => {
+      const brand = await BrandM.findById(brandID);
+      if (!brand) {
+        return Promise.reject(new ApiError("Brand not found", 404));
+      }
+      return true;
+    }),
   check("ratingsAverage")
     .optional()
     .isNumeric()
@@ -109,11 +122,6 @@ exports.createProductValidator = [
     .optional()
     .isNumeric()
     .withMessage("Product Ratings Quantity should be a number"),
-  validatorMiddleware,
-];
-
-exports.getProdcutValidator = [
-  check("id").isMongoId().withMessage("Invalid Product Id"),
   validatorMiddleware,
 ];
 
@@ -152,12 +160,14 @@ exports.updateProductValidator = [
       if (!price) {
         const product = await ProductM.findById(req.params.id).select("price");
         if (!product) {
-          throw new ApiError("Product not found", 404);
+          return Promise.reject(new ApiError("Product not found", 404));
         }
         price = product.price;
       }
       if (price <= value) {
-        throw new ApiError("Price After Discount must be less than Price", 400);
+        return Promise.reject(
+          new ApiError("Price After Discount must be less than Price", 400)
+        );
       }
       return true;
     }),
@@ -177,7 +187,7 @@ exports.updateProductValidator = [
     .custom(async (categoryID) => {
       const category = await CategoryM.findById(categoryID);
       if (!category) {
-        throw new ApiError("Category not found", 404);
+        return Promise.reject(new ApiError("Category not found", 404));
       }
       return true;
     }),
@@ -228,7 +238,17 @@ exports.updateProductValidator = [
         );
       }
     }),
-  check("brand").optional().isMongoId().withMessage("Invalid Id Format"),
+  check("brand")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid Id Format")
+    .custom(async (brandID) => {
+      const brand = await BrandM.findById(brandID);
+      if (!brand) {
+        return Promise.reject(new ApiError("Brand not found", 404));
+      }
+      return true;
+    }),
   check("ratingsAverage")
     .optional()
     .isNumeric()
@@ -241,6 +261,11 @@ exports.updateProductValidator = [
     .optional()
     .isNumeric()
     .withMessage("Product Ratings Quantity should be a number"),
+  validatorMiddleware,
+];
+
+exports.getProdcutValidator = [
+  check("id").isMongoId().withMessage("Invalid Product Id"),
   validatorMiddleware,
 ];
 

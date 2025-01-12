@@ -19,7 +19,7 @@ exports.createSubcategoryValidator = [
     .custom(async (categoryID) => {
       const category = await CategoryM.findById(categoryID);
       if (!category) {
-        throw new ApiError("Category not found", 404);
+        return Promise.reject(new ApiError("Category not found", 404));
       }
       return true;
     }),
@@ -39,7 +39,7 @@ exports.updateSubcategoryValidator = [
     .custom(async (categoryID) => {
       const category = await CategoryM.findById(categoryID);
       if (!category) {
-        throw new ApiError("Category not found", 404);
+        return Promise.reject(new ApiError("Category not found", 404));
       }
       return true;
     }),
