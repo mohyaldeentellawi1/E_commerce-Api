@@ -1,11 +1,7 @@
 const { check } = require("express-validator");
 const CategoryM = require("../../models/categoryModel");
+const ApiError = require("../../utils/apiError").default;
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
-
-exports.getSubcategoryValidator = [
-  check("id").isMongoId().withMessage("Invalid Subcategory Id"),
-  validatorMiddleware,
-];
 
 exports.createSubcategoryValidator = [
   check("name")
@@ -37,10 +33,21 @@ exports.updateSubcategoryValidator = [
     .isString()
     .withMessage("Subcategory Name should be a string"),
   check("category")
-    .notEmpty()
-    .withMessage("Category is required")
+    .optional()
     .isMongoId()
-    .withMessage("Invalid Category Id"),
+    .withMessage("Invalid Category Id")
+    .custom(async (categoryID) => {
+      const category = await CategoryM.findById(categoryID);
+      if (!category) {
+        throw new ApiError("Category not found", 404);
+      }
+      return true;
+    }),
+  validatorMiddleware,
+];
+
+exports.getSubcategoryValidator = [
+  check("id").isMongoId().withMessage("Invalid Subcategory Id"),
   validatorMiddleware,
 ];
 
