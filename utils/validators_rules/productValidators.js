@@ -1,7 +1,7 @@
 const { check } = require("express-validator");
 const ApiError = require("../../utils/apiError").default;
 const ProductM = require("../../models/productModel");
-const CategoryM = require("../..//models/categoryModel");
+const CategoryM = require("../../models/categoryModel");
 const SubCategoryM = require("../../models/subCategoryModel");
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
 
