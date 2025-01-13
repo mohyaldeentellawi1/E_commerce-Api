@@ -7,7 +7,7 @@ multerOption = () => {
   // Multer Filter
   const multerFilter = (req, file, cb) => {
     if (file.mimetype.startsWith("image")) {
-      cb(null, true);
+      cb(null, true); // here null means no error
     } else {
       cb(new ApiError("Not an image! Please upload only images.", 400), false);
     }
