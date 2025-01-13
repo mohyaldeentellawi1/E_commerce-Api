@@ -1,8 +1,8 @@
-const CategoryM = require("../models/categoryModel");
-const factory = require("./handlersFactory");
 const asyncHandler = require("express-async-handler");
 const sharp = require("sharp"); // for image processing
 const { v4: uuidv4 } = require("uuid");
+const factory = require("./handlersFactory");
+const CategoryM = require("../models/categoryModel");
 const { uploadSingleImage } = require("../middleware/uploadImageMiddleware");
 
 // @desc   Get all categories

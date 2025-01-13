@@ -1,7 +1,6 @@
 const asyncHandler = require("express-async-handler");
-const ApiError = require("../utils/apiError").default;
-const ApiFeatures = require("../utils/apiFeatures").default;
-const { default: slugify } = require("slugify");
+const ApiError = require("../utils/apiError");
+const ApiFeatures = require("../utils/apiFeatures");
 
 exports.deleteOne = (Model) =>
   asyncHandler(async (req, res, next) => {

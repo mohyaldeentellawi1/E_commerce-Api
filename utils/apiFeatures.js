@@ -1,3 +1,4 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 class ApiFeatures {
   constructor(mongooseQuery, queryString) {
     this.mongooseQuery = mongooseQuery;
@@ -77,4 +78,4 @@ class ApiFeatures {
   }
 }
 
-export default ApiFeatures;
+module.exports = ApiFeatures;

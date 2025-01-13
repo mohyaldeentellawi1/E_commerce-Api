@@ -1,7 +1,7 @@
 const multer = require("multer");
-const ApiError = require("../utils/apiError").default;
+const ApiError = require("../utils/apiError");
 
-multerOption = () => {
+const multerOption = () => {
   // memory storage engine as buffer
   const multerStorage = multer.memoryStorage();
   // Multer Filter

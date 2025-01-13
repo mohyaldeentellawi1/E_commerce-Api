@@ -1,8 +1,9 @@
 const { check } = require("express-validator");
-const UserModel = require("../../models/userModel");
-const ApiError = require("../../utils/apiError").default;
 const bcrypt = require("bcryptjs");
 const slugify = require("slugify");
+const UserModel = require("../../models/userModel");
+const ApiError = require("../apiError");
+
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
 
 exports.getUserValidator = [
@@ -55,10 +56,10 @@ exports.createUserValidator = [
       const phoneStr = String(val);
       const phoneWithCountryCode = phoneStr.startsWith("+90")
         ? phoneStr
-        : "+90" + phoneStr;
+        : `+90${phoneStr}`;
       const phoneWithLeadingZero = phoneStr.startsWith("0")
         ? phoneStr
-        : "0" + phoneStr;
+        : `0${phoneStr}`;
       const phoneWithoutLeadingZero = phoneStr.startsWith("0")
         ? phoneStr.slice(1)
         : phoneStr;

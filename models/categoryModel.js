@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const asyncHandler = require("express-async-handler");
 // Create a Schema
 const categorySchema = new mongoose.Schema(
   {
@@ -37,16 +37,18 @@ categorySchema.post("save", (doc) => {
 });
 
 // delete all subCategories childs when category is deleted
-categorySchema.pre("findOneAndDelete", async function (next) {
-  const categoryId = this.getQuery()._id;
-  await mongoose.model("SubCategory").deleteMany({ category: categoryId });
-  next();
-});
+asyncHandler(
+  categorySchema.pre("findOneAndDelete", async function (next) {
+    const categoryId = this.getQuery()._id;
+    await mongoose.model("SubCategory").deleteMany({ category: categoryId });
+    next();
+  })
+);
 
 // delete all products childs when category is deleted
 categorySchema.pre("findOneAndDelete", async function (next) {
-  const productId = this.getQuery()._id;
-  await mongoose.model("Product").deleteMany({ category: productId });
+  const categoryId = this.getQuery()._id;
+  await mongoose.model("Product").deleteMany({ category: categoryId });
   next();
 });
 

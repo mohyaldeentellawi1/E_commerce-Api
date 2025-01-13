@@ -1,10 +1,10 @@
-const UserModel = require("../models/userModel");
-const factory = require("./handlersFactory");
 const asyncHandler = require("express-async-handler");
 const sharp = require("sharp");
-const ApiError = require("../utils/apiError");
 const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
+const ApiError = require("../utils/apiError");
+const factory = require("./handlersFactory");
+const UserModel = require("../models/userModel");
 const { uploadSingleImage } = require("../middleware/uploadImageMiddleware");
 
 // @desc   Get all Users

@@ -15,6 +15,7 @@ const {
   updateBrandValidator,
   deleteBrandValidator,
 } = require("../utils/validators_rules/brandValidatorRules");
+
 const router = express.Router();
 
 router

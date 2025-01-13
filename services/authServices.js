@@ -1,10 +1,11 @@
 const crypto = require("crypto");
-const asyncHandler = require("express-async-handler");
-const createToken = require("../middleware/creatTokenMiddleware");
-const ApiError = require("../utils/apiError").default;
-const sendEmail = require("../utils/sendEmail");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const asyncHandler = require("express-async-handler");
+const createToken = require("../middleware/creatTokenMiddleware");
+const ApiError = require("../utils/apiError");
+const sendEmail = require("../utils/sendEmail");
+
 const UserModel = require("../models/userModel");
 
 // @desc  Register a User

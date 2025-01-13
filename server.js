@@ -2,6 +2,7 @@ const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
+
 dotenv.config({ path: "config.env" });
 const dbConnection = require("./config/database");
 const categoryRoute = require("./routes/categoryRoute");
@@ -11,7 +12,7 @@ const brandsRoute = require("./routes/brandRoute");
 const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
 
-const ApiError = require("./utils/apiError").default;
+const ApiError = require("./utils/apiError");
 const globalError = require("./middleware/errorMiddleware");
 
 // express app
@@ -46,7 +47,7 @@ app.all("*", (req, res, next) => {
 // Global Error Handler Middleware for express
 app.use(globalError);
 
-const PORT = process.env.PORT;
+const { PORT } = process.env;
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

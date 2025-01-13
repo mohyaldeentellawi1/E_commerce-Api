@@ -1,10 +1,11 @@
 const { check } = require("express-validator");
-const ApiError = require("../../utils/apiError").default;
+const slugify = require("slugify");
+const ApiError = require("../apiError");
 const ProductM = require("../../models/productModel");
 const CategoryM = require("../../models/categoryModel");
 const SubCategoryM = require("../../models/subCategoryModel");
 const BrandM = require("../../models/brandsModel");
-const slugify = require("slugify");
+
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
 
 exports.createProductValidator = [
@@ -166,13 +167,13 @@ exports.updateProductValidator = [
     .withMessage("Product Price After Discount should be a number")
     .toFloat()
     .custom(async (value, { req }) => {
-      let price = req.body.price;
+      let { price } = req.body;
       if (!price) {
         const product = await ProductM.findById(req.params.id).select("price");
         if (!product) {
           return Promise.reject(new ApiError("Product not found", 404));
         }
-        price = product.price;
+        ({ price } = product);
       }
       if (price <= value) {
         return Promise.reject(

@@ -1,8 +1,9 @@
 const { check } = require("express-validator");
-const ApiError = require("../../utils/apiError").default;
 const slugify = require("slugify");
+// const bcrypt = require("bcryptjs");
 const UserModel = require("../../models/userModel");
-const bcrypt = require("bcryptjs");
+const ApiError = require("../apiError");
+
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
 
 exports.registerValidator = [

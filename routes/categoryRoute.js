@@ -16,6 +16,7 @@ const {
   updateCategoryValidator,
   deleteCategoryValidator,
 } = require("../utils/validators_rules/categoryValidatorRules");
+
 const router = express.Router();
 
 // Nested Routes
