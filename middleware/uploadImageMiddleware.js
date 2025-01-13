@@ -20,15 +20,3 @@ exports.uploadSingleImage = (fieldName) => multerOption().single(fieldName);
 
 exports.uploadMultipleImages = (arrayOfFields) =>
   multerOption().fields(arrayOfFields);
-
-// Disk Storage Engine
-// const multerStorage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, 'uploads/categories');
-//     },
-//     filename: (req, file, cb) => {
-//         const ext = file.mimetype.split('/')[1];
-//         const fileName = `category-${uuidv4()}-${Date.now()}.${ext}`;
-//         cb(null, fileName);
-//     }
-// });
