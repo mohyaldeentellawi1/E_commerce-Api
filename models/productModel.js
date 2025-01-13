@@ -97,12 +97,12 @@ productSchema.post("init", (doc) => {
     doc.imageCover = imageUrl;
   }
   if (doc.images) {
-    const images = [];
+    const imagelist = [];
     doc.images.forEach((image) => {
       const imageUrl = `${process.env.BASE_URL}/products/${image}`;
-      images.push(imageUrl);
+      imagelist.push(imageUrl);
     });
-    doc.images = images;
+    doc.images = imagelist;
   }
 });
 
@@ -113,12 +113,12 @@ productSchema.post("save", (doc) => {
     doc.imageCover = imageUrl;
   }
   if (doc.images) {
-    const images = [];
+    const imageList = [];
     doc.images.forEach((image) => {
       const imageUrl = `${process.env.BASE_URL}/products/${image}`;
-      images.push(imageUrl);
+      imageList.push(imageUrl);
     });
-    doc.images = images;
+    doc.images = imageList;
   }
 });
 
