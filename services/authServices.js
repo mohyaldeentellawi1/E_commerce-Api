@@ -11,14 +11,15 @@ const UserModel = require("../models/userModel");
 // @desc  Register a User
 // @route POST /api/v1/auth/register
 // @access Public
-exports.register = asyncHandler(async (req, res, next) => {
-  const user = await UserModel.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-  });
+exports.register = asyncHandler(async (req, res) => {
+  const user = await UserModel.create(req.body);
   const token = createToken(user._id);
-  res.status(201).json({ data: user, token });
+  res.status(201).json({
+    success: true,
+    message: "User Registered Successfully",
+    data: user,
+    accessToken: token,
+  });
 });
 
 // @desc  Login a User
@@ -26,11 +27,20 @@ exports.register = asyncHandler(async (req, res, next) => {
 // @access Public
 exports.login = asyncHandler(async (req, res, next) => {
   const user = await UserModel.findOne({ email: req.body.email });
-  if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
-    return next(new ApiError("Invalid Email or Password", 401));
+  const isCorrectPassword = await bcrypt.compare(
+    req.body.password,
+    user.password
+  );
+  if (!user || !isCorrectPassword) {
+    return next(new ApiError("Incorrect Email or Password", 401));
   }
   const token = createToken(user._id);
-  res.status(200).json({ data: user, token });
+  res.status(200).json({
+    success: true,
+    message: "User Logged In Successfully",
+    data: user,
+    accessToken: token,
+  });
 });
 
 // @desc  Protect Routes
