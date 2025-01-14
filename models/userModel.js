@@ -1,75 +1,85 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
-const UserSchema = new mongoose.Schema({
-    name:{
-        type: String,
-        trim: true,
-        required: [true, 'Name is required'],
+const UserSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      trim: true,
+      required: [true, "Name is required"],
     },
-    slug:{
-        type: String,
+    slug: {
+      type: String,
+      lowerCase: true,
     },
-    email:{
-        type: String,
-        lowercase: true,    
-        trim: true,
-        required: [true, 'Email is required'],
-        unique: [true, 'Email must be unique'],
+    email: {
+      type: String,
+      lowercase: true,
+      trim: true,
+      required: [true, "Email is required"],
+      unique: [true, "Email must be unique"],
     },
-    password:{
-        type: String,
-        required: [true, 'Password is required'],
-        trim: true,
-        minlength: [6, 'Too short password'],
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      trim: true,
+      minlength: [6, "Too short password"],
     },
-    passwordChangedAt : Date,
-    otp: String,
-    otpExpires: Date,
-    otpVerified: Boolean,
+    passwordChangedAt: {
+      type: Date,
+    },
+    otp: {
+      type: String,
+    },
+    otpExpires: {
+      type: Date,
+    },
+    otpVerified: {
+      type: Boolean,
+      default: false,
+    },
     phone: {
-        type: String,
-        trim: true,
+      type: String,
+      trim: true,
     },
-    profileImage : {
-        type: String,
+    profileImage: {
+      type: String,
     },
-    role : {
-        type: String,
-        enum: ['user', 'admin', 'manager'],
-        default: 'user',
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
     },
     active: {
-        type: Boolean,
-        default: true,
+      type: Boolean,
+      default: true,
     },
-},
-{timestamps: true},
+  },
+  { timestamps: true }
 );
-
-UserSchema.pre('save', async function(next){
-    if(!this.isModified('password')) return next();
-    this.password = await bcrypt.hash(this.password, 10);
-    next();
+// For HashPassword
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
 });
 
 // update , delete, get , getALL
-UserSchema.post('init', (doc)=>{
-    if(doc.profileImage){
-        const imageUrl = `${process.env.BASE_URL}/users/${doc.profileImage}`;
-        doc.profileImage = imageUrl;
-    }
+UserSchema.post("init", (doc) => {
+  if (doc.profileImage) {
+    const imageUrl = `${process.env.BASE_URL}/users/${doc.profileImage}`;
+    doc.profileImage = imageUrl;
+  }
 });
 
 // create
-UserSchema.post('save', (doc)=>{
-    if(doc.profileImage){
-        const imageUrl = `${process.env.BASE_URL}/users/${doc.profileImage}`;
-        doc.profileImage = imageUrl;
-    }
+UserSchema.post("save", (doc) => {
+  if (doc.profileImage) {
+    const imageUrl = `${process.env.BASE_URL}/users/${doc.profileImage}`;
+    doc.profileImage = imageUrl;
+  }
 });
 
-
-const UserModel = mongoose.model('User', UserSchema);
+const UserModel = mongoose.model("User", UserSchema);
 
 module.exports = UserModel;

@@ -1,6 +1,5 @@
 const { check } = require("express-validator");
 const slugify = require("slugify");
-// const bcrypt = require("bcryptjs");
 const UserModel = require("../../models/userModel");
 const ApiError = require("../apiError");
 
@@ -22,8 +21,8 @@ exports.registerValidator = [
     .isEmail()
     .withMessage("Invalid Email")
     .custom((val) =>
-      UserModel.findOne({ email: val }).then((email) => {
-        if (email) {
+      UserModel.findOne({ email: val }).then((user) => {
+        if (user) {
           return Promise.reject(new ApiError("Email already exists", 400));
         }
         return true;
@@ -36,7 +35,7 @@ exports.registerValidator = [
     .withMessage("Password should be at least 6 characters")
     .custom((pass, { req }) => {
       if (pass !== req.body.confirmPassword) {
-        throw new ApiError("Passwords do not match", 400);
+        return Promise.reject(new ApiError("Passwords do not match", 400));
       }
       return true;
     }),

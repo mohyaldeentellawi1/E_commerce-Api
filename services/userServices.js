@@ -22,7 +22,7 @@ exports.getUser = factory.getOne(UserModel);
 // @access Private (Admin , User)
 exports.createUser = factory.createOne(UserModel);
 
-// @desc   Update a User
+// @desc   Update a User Without Password
 // @route  PUT /api/v1/users/:id
 // @access Private (Admin , User)
 exports.updateUser = asyncHandler(async (req, res, next) => {
@@ -30,20 +30,50 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     req.params.id,
     {
       name: req.body.name,
+      slug: req.body.slug,
       email: req.body.email,
       phone: req.body.phone,
       profileImage: req.body.profileImage,
-      role: req.body.role,
-      active: req.body.active,
     },
-    { new: true }
+    {
+      new: true,
+    }
   );
   if (!document) {
     return next(
-      new ApiError(`document not found with id of ${req.params.id}`, 404)
+      new ApiError(`User not found with id of ${req.params.id}`, 404)
     );
   }
-  res.status(200).json({ data: document });
+  res.status(200).json({
+    success: true,
+    message: "User Updated successfully",
+    data: document,
+  });
+});
+
+// @desc   Update a User Role
+// @route  PUT /api/v1/users/updateRole/:id
+// @access Private (Admin)
+exports.updateRole = asyncHandler(async (req, res, next) => {
+  const document = await UserModel.findByIdAndUpdate(
+    req.params.id,
+    {
+      role: req.body.role,
+    },
+    {
+      new: true,
+    }
+  );
+  if (!document) {
+    return next(
+      new ApiError(`User not found with id of ${req.params.id}`, 404)
+    );
+  }
+  res.status(200).json({
+    success: true,
+    message: "User Updated successfully",
+    data: document,
+  });
 });
 
 // @desc   Update a User Password
@@ -53,7 +83,7 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
   const user = await UserModel.findByIdAndUpdate(
     req.params.id,
     {
-      password: await bcrypt.hash(req.body.password, 10),
+      password: await bcrypt.hash(req.body.password, 12),
       passwordChangedAt: Date.now(),
     },
     { new: true }

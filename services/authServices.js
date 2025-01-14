@@ -70,7 +70,7 @@ exports.allowTo = (...roles) =>
   asyncHandler(async (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
-        new ApiError("You are not allowed to access this route", 403)
+        new ApiError("Only the admin has the right to modify the Role", 403)
       );
     }
     next();

@@ -6,11 +6,6 @@ const ApiError = require("../apiError");
 
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
 
-exports.getUserValidator = [
-  check("id").isMongoId().withMessage("Invalid User Id"),
-  validatorMiddleware,
-];
-
 exports.createUserValidator = [
   check("name")
     .notEmpty()
@@ -25,10 +20,10 @@ exports.createUserValidator = [
     .notEmpty()
     .withMessage("User Email is required")
     .isEmail()
-    .withMessage("Invalid Email")
-    .custom((val) =>
-      UserModel.findOne({ email: val }).then((email) => {
-        if (email) {
+    .withMessage("Invalid Email Format")
+    .custom(async (val) =>
+      UserModel.findOne({ email: val }).then((user) => {
+        if (user) {
           return Promise.reject(new ApiError("Email already exists", 400));
         }
         return true;
@@ -41,7 +36,7 @@ exports.createUserValidator = [
     .withMessage("Password should be at least 6 characters")
     .custom((pass, { req }) => {
       if (pass !== req.body.confirmPassword) {
-        throw new ApiError("Passwords do not match", 400);
+        return Promise.reject(new ApiError("Passwords do not match", 400));
       }
       return true;
     }),
@@ -50,34 +45,8 @@ exports.createUserValidator = [
     .withMessage("Confirm Password is required"),
   check("phone")
     .optional()
-    .isMobilePhone("tr-TR")
-    .withMessage("Invalid Phone Number")
-    .custom((val) => {
-      const phoneStr = String(val);
-      const phoneWithCountryCode = phoneStr.startsWith("+90")
-        ? phoneStr
-        : `+90${phoneStr}`;
-      const phoneWithLeadingZero = phoneStr.startsWith("0")
-        ? phoneStr
-        : `0${phoneStr}`;
-      const phoneWithoutLeadingZero = phoneStr.startsWith("0")
-        ? phoneStr.slice(1)
-        : phoneStr;
-      return UserModel.findOne({
-        $or: [
-          { phone: phoneWithCountryCode },
-          { phone: phoneWithLeadingZero },
-          { phone: phoneWithoutLeadingZero },
-        ],
-      }).then((phone) => {
-        if (phone) {
-          return Promise.reject(
-            new ApiError("Phone Number already exists", 400)
-          );
-        }
-        return true;
-      });
-    }),
+    .isMobilePhone(["tr-TR", "ar-SY"], { strictMode: true })
+    .withMessage("Invalid Phone Number for this country"),
   check("profileImage").optional(),
   validatorMiddleware,
 ];
@@ -92,25 +61,22 @@ exports.updateUserValidator = [
       req.body.slug = slugify(val);
       return true;
     }),
-  check("email").optional().isEmail().withMessage("Invalid Email"),
-  check("password")
+  check("email")
     .optional()
-    .isLength({ min: 6 })
-    .withMessage("Password should be at least 6 characters"),
-  check("phone")
-    .optional()
-    .isMobilePhone("tr-TR")
-    .withMessage("Invalid Phone Number")
-    .custom((val) =>
-      UserModel.findOne({ phone: val }).then((phone) => {
-        if (phone) {
-          return Promise.reject(
-            new ApiError("Phone Number already exists", 400)
-          );
+    .isEmail()
+    .withMessage("Invalid Email Format")
+    .custom(async (val) =>
+      UserModel.findOne({ email: val }).then((user) => {
+        if (user) {
+          return Promise.reject(new ApiError("Email already exists", 400));
         }
         return true;
       })
     ),
+  check("phone")
+    .optional()
+    .isMobilePhone(["tr-TR", "ar-SY"], { strictMode: true })
+    .withMessage("Invalid Phone Number for this country"),
   check("profileImage").optional(),
   validatorMiddleware,
 ];
@@ -126,10 +92,12 @@ exports.updatePasswordValidator = [
   check("password")
     .notEmpty()
     .withMessage("New Password is required")
-    .custom(async (val, { req }) => {
+    .custom(async (newPass, { req }) => {
       const user = await UserModel.findById(req.params.id);
       if (!user) {
-        throw new ApiError("User not found", 404);
+        return Promise.reject(
+          new ApiError(`User not found with id of ${req.params.id}`, 404)
+        );
       }
       const isCorrectPassword = await bcrypt.compare(
         req.body.currentPassword,
@@ -140,11 +108,16 @@ exports.updatePasswordValidator = [
           new ApiError("Current Password is incorrect", 400)
         );
       }
-      if (val !== req.body.confirmPassword) {
+      if (newPass !== req.body.confirmPassword) {
         return Promise.reject(new ApiError("Passwords do not match", 400));
       }
       return true;
     }),
+  validatorMiddleware,
+];
+
+exports.getUserValidator = [
+  check("id").isMongoId().withMessage("Invalid User Id"),
   validatorMiddleware,
 ];
 
