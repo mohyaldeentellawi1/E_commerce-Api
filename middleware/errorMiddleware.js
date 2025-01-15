@@ -1,7 +1,7 @@
-const AppError = require("../utils/apiError");
+const ApiError = require("../utils/apiError");
 
 const handleJwtInvalidSignature = () =>
-  new AppError("Invalid Token. Please login again", 401);
+  new ApiError("Invalid Token. Please login again", 401);
 
 const sendErrorDev = (error, res) =>
   res.status(error.statusCode).json({

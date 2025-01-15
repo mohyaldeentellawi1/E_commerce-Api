@@ -42,6 +42,9 @@ exports.registerValidator = [
   check("confirmPassword")
     .notEmpty()
     .withMessage("Confirm Password is required"),
+  check("role").isEmpty().withMessage("Role is not allowed"),
+  check("otp").isEmpty().withMessage("otp is not allowed"),
+  check("profileImage").isEmpty().withMessage("profileImage is not allowed"),
   validatorMiddleware,
 ];
 

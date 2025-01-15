@@ -47,7 +47,7 @@ router
   .get(protect, allowTo("admin", "user"), getUserValidator, getUser)
   .put(
     protect,
-    allowTo("user"),
+    allowTo("admin", "user"),
     uploadUserImage,
     imageProcessing,
     updateUserValidator,

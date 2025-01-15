@@ -1,7 +1,6 @@
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
 const createToken = require("../middleware/creatTokenMiddleware");
 const ApiError = require("../utils/apiError");
@@ -13,16 +12,7 @@ const UserModel = require("../models/userModel");
 // @route POST /api/v1/auth/register
 // @access Public
 exports.register = asyncHandler(async (req, res) => {
-  const user = await UserModel.create(
-    {
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-    },
-    {
-      slug: slugify(req.body.name),
-    }
-  );
+  const user = await UserModel.create(req.body);
   const token = createToken(user._id);
   res.status(201).json({
     success: true,
@@ -88,9 +78,10 @@ exports.protect = asyncHandler(async (req, res, next) => {
 // @desc  Grant Access to specific roles
 exports.allowTo = (...roles) =>
   asyncHandler(async (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    const isAuthenticatedUser = roles.includes(req.user.role);
+    if (!isAuthenticatedUser) {
       return next(
-        new ApiError("Only the admin has the right to modify the Role", 403)
+        new ApiError("You are not allowed to access this route", 403)
       );
     }
     next();
@@ -130,5 +121,5 @@ exports.forgetPassword = asyncHandler(async (req, res, next) => {
   }
   res
     .status(200)
-    .json({ status: "success", message: "Reset Code sent to your email" });
+    .json({ success: true, message: "Reset Code sent to your email" });
 });
