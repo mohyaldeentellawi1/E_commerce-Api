@@ -23,7 +23,7 @@ router
   .get(getBrands)
   .post(
     protect,
-    allowTo("admin", "manager"),
+    allowTo("admin"),
     uploadBrandImage,
     imageProcessing,
     createBrandValidator,
@@ -34,17 +34,12 @@ router
   .get(getBrandValidator, getBrand)
   .put(
     protect,
-    allowTo("admin", "manager"),
+    allowTo("admin"),
     uploadBrandImage,
     imageProcessing,
     updateBrandValidator,
     updateBrand
   )
-  .delete(
-    protect,
-    allowTo("admin", "manager"),
-    deleteBrandValidator,
-    deleteBrand
-  );
+  .delete(protect, allowTo("admin"), deleteBrandValidator, deleteBrand);
 
 module.exports = router;

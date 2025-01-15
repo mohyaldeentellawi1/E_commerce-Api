@@ -61,11 +61,11 @@ exports.protect = asyncHandler(async (req, res, next) => {
     return next(new ApiError("No user found with this id", 404));
   }
   if (user.passwordChangedAt) {
-    const changedPasswordTime = parseInt(
+    const changedPasswordTimeStamp = parseInt(
       user.passwordChangedAt.getTime() / 1000,
       10
     );
-    if (changedPasswordTime > decoded.iat) {
+    if (changedPasswordTimeStamp > decoded.iat) {
       return next(
         new ApiError("Password has been changed. Please login again", 401)
       );

@@ -23,7 +23,7 @@ router
   .get(getProducts)
   .post(
     protect,
-    allowTo("admin", "manager"),
+    allowTo("admin"),
     uploadProductImages,
     productImageProcessing,
     createProductValidator,
@@ -34,18 +34,12 @@ router
   .get(getProdcutValidator, getProduct)
   .put(
     protect,
-    allowTo("admin", "manager"),
-
+    allowTo("admin"),
     uploadProductImages,
     productImageProcessing,
     updateProductValidator,
     updateProduct
   )
-  .delete(
-    protect,
-    allowTo("admin", "manager"),
-    deleteProductValidator,
-    deleteProduct
-  );
+  .delete(protect, allowTo("admin"), deleteProductValidator, deleteProduct);
 
 module.exports = router;

@@ -24,7 +24,7 @@ router
   .route("/")
   .post(
     protect,
-    allowTo("admin", "manager"),
+    allowTo("admin"),
     setCategoryIdFromParams,
     createSubcategoryValidator,
     createSubCategory
@@ -33,15 +33,10 @@ router
 router
   .route("/:id")
   .get(getSubcategoryValidator, getSubCategory)
-  .put(
-    protect,
-    allowTo("admin", "manager"),
-    updateSubcategoryValidator,
-    updateSubCategory
-  )
+  .put(protect, allowTo("admin"), updateSubcategoryValidator, updateSubCategory)
   .delete(
     protect,
-    allowTo("admin", "manager"),
+    allowTo("admin"),
     deleteSubcategoryValidator,
     deleteSubCategory
   );

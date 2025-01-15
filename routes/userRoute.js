@@ -36,7 +36,7 @@ router
   .get(protect, allowTo("admin"), getUsers)
   .post(
     protect,
-    allowTo("admin", "user"),
+    allowTo("admin"),
     uploadUserImage,
     imageProcessing,
     createUserValidator,
