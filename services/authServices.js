@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
 const createToken = require("../middleware/creatTokenMiddleware");
 const ApiError = require("../utils/apiError");
@@ -12,7 +13,16 @@ const UserModel = require("../models/userModel");
 // @route POST /api/v1/auth/register
 // @access Public
 exports.register = asyncHandler(async (req, res) => {
-  const user = await UserModel.create(req.body);
+  const user = await UserModel.create(
+    {
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+    },
+    {
+      slug: slugify(req.body.name),
+    }
+  );
   const token = createToken(user._id);
   res.status(201).json({
     success: true,
