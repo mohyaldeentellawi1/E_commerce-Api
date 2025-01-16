@@ -174,3 +174,15 @@ exports.updateLoggedUserData = asyncHandler(async (req, res, next) => {
     accessToken: token,
   });
 });
+
+// @desc Deactive Logged User
+// @route PUT /api/v1/users/delete-me
+// @access Private (User)
+exports.deactiveLoggedUser = asyncHandler(async (req, res, next) => {
+  await UserModel.findByIdAndUpdate(req.user._id, { active: false });
+
+  res.status(200).json({
+    success: true,
+    message: "User Deactivated successfully",
+  });
+});

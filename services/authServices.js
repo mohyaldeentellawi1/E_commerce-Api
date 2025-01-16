@@ -39,6 +39,10 @@ exports.login = asyncHandler(async (req, res, next) => {
   if (!user || !isCorrectPassword) {
     return next(new ApiError("Incorrect Email or Password", 401));
   }
+  if (!user.active) {
+    user.active = true;
+    await user.save();
+  }
   const token = createToken(user._id);
   res.status(200).json({
     success: true,
@@ -74,6 +78,9 @@ exports.protect = asyncHandler(async (req, res, next) => {
       return next(
         new ApiError("Password has been changed. Please login again", 401)
       );
+    }
+    if (!user.active) {
+      return next(new ApiError("User is deactivated", 401));
     }
   }
   req.user = user;

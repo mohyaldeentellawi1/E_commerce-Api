@@ -12,6 +12,7 @@ const {
   getLoggedUserData,
   updateLoggedUserPassword,
   updateLoggedUserData,
+  deactiveLoggedUser: deleteLoggedUser,
 } = require("../services/userServices");
 const { protect, allowTo } = require("../services/authServices");
 const {
@@ -41,6 +42,7 @@ router.put(
   updateLoggedUserValidator,
   updateLoggedUserData
 );
+router.put("/delete-me", protect, deleteLoggedUser);
 
 router.use(protect, allowTo("admin"));
 
