@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const asyncHandler = require("express-async-handler");
 const createToken = require("../middleware/creatTokenMiddleware");
 const ApiError = require("../utils/apiError");
-// const sendEmail = require("../utils/sendEmail");
+const sendEmail = require("../utils/sendEmail");
 
 const UserModel = require("../models/userModel");
 
@@ -108,7 +108,6 @@ exports.forgetPassword = asyncHandler(async (req, res, next) => {
     return next(new ApiError("No user found with this email", 404));
   }
   const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-  console.log(resetCode);
   const hashedCode = crypto
     .createHash("sha256")
     .update(resetCode)
@@ -119,23 +118,24 @@ exports.forgetPassword = asyncHandler(async (req, res, next) => {
   await user.save();
   const message = `Hi ${user.name},\n We have received a request to reset your password. Please use the following code to reset your password:\n ${resetCode}\n`;
 
-  // try {
-  //   await sendEmail({
-  //     from: "no-reply@demomailtrap",
-  //     to: user.email,
-  //     subject: "Password Reset Code",
-  //     text: message,
-  //   });
-  // } catch (error) {
-  //   user.otp = undefined;
-  //   user.otpExpires = undefined;
-  //   user.otpVerified = undefined;
-  //   await user.save();
-  //   return next(new ApiError("Email could not be sent", 500));
-  // }
+  try {
+    await sendEmail({
+      from: "no-reply@demomailtrap",
+      to: user.email,
+      subject: "Password Reset Code",
+      text: message,
+      html: message,
+    });
+  } catch (error) {
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    user.otpVerified = undefined;
+    await user.save();
+    return next(new ApiError("Email could not be sent", 500));
+  }
   res.status(200).json({
     success: true,
-    message: message,
+    message: "Code sent to your email",
   });
 });
 
