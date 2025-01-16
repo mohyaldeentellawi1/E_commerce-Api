@@ -125,3 +125,66 @@ exports.deleteUserValidator = [
   check("id").isMongoId().withMessage("Invalid User Id"),
   validatorMiddleware,
 ];
+
+exports.updateLoggedUserValidator = [
+  check("name")
+    .optional()
+    .isString()
+    .withMessage("User Name should be a string")
+    .custom((val, { req }) => {
+      req.body.slug = slugify(val);
+      return true;
+    }),
+  check("email")
+    .optional()
+    .isEmail()
+    .withMessage("Invalid Email Format")
+    .custom(async (val) =>
+      UserModel.findOne({ email: val }).then((user) => {
+        if (user) {
+          return Promise.reject(new ApiError("Email already exists", 400));
+        }
+        return true;
+      })
+    ),
+  check("phone")
+    .optional()
+    .isMobilePhone(["tr-TR", "ar-SY"], { strictMode: true })
+    .withMessage("Invalid Phone Number for this country"),
+  check("profileImage").optional(),
+  validatorMiddleware,
+];
+
+exports.updateLoggedUserPasswordValidator = [
+  check("currentPassword")
+    .notEmpty()
+    .withMessage("Current Password is required"),
+  check("confirmPassword")
+    .notEmpty()
+    .withMessage("Confirm Password is required"),
+  check("password")
+    .notEmpty()
+    .withMessage("New Password is required")
+    .custom(async (newPass, { req }) => {
+      const user = await UserModel.findById(req.user._id);
+      if (!user) {
+        return Promise.reject(
+          new ApiError(`User not found with id of ${req.user._id}`, 404)
+        );
+      }
+      const isCorrectPassword = await bcrypt.compare(
+        req.body.currentPassword,
+        user.password
+      );
+      if (!isCorrectPassword) {
+        return Promise.reject(
+          new ApiError("Current Password is incorrect", 400)
+        );
+      }
+      if (newPass !== req.body.confirmPassword) {
+        return Promise.reject(new ApiError("Passwords do not match", 400));
+      }
+      return true;
+    }),
+  validatorMiddleware,
+];

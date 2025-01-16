@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const asyncHandler = require("express-async-handler");
 const createToken = require("../middleware/creatTokenMiddleware");
 const ApiError = require("../utils/apiError");
-const sendEmail = require("../utils/sendEmail");
+// const sendEmail = require("../utils/sendEmail");
 
 const UserModel = require("../models/userModel");
 
@@ -12,7 +12,12 @@ const UserModel = require("../models/userModel");
 // @route POST /api/v1/auth/register
 // @access Public
 exports.register = asyncHandler(async (req, res) => {
-  const user = await UserModel.create(req.body);
+  const user = await UserModel.create({
+    name: req.body.name,
+    slug: req.body.slug,
+    email: req.body.email,
+    password: req.body.password,
+  });
   const token = createToken(user._id);
   res.status(201).json({
     success: true,
@@ -101,25 +106,72 @@ exports.forgetPassword = asyncHandler(async (req, res, next) => {
     .createHash("sha256")
     .update(resetCode)
     .digest("hex");
-  user.otp = hashedCode;
-  user.otpExpires = Date.now() + 10 * 60 * 1000;
-  user.otpVerified = false;
+  user.otp = hashedCode; // hashed code is stored in the database
+  user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  user.otpVerified = false; // set to true when the user verifies the code
   await user.save();
   const message = `Hi ${user.name},\n We have received a request to reset your password. Please use the following code to reset your password:\n ${resetCode}\n`;
-  try {
-    await sendEmail({
-      email: user.email,
-      subject: "Password Reset Code (valid for 10 minutes)",
-      message,
-    });
-  } catch (error) {
-    user.otp = undefined;
-    user.otpExpires = undefined;
-    user.otpVerified = undefined;
-    await user.save();
-    return next(new ApiError("Email could not be sent", 500));
+
+  // try {
+  //   await sendEmail({
+  //     from: "no-reply@demomailtrap",
+  //     to: user.email,
+  //     subject: "Password Reset Code",
+  //     text: message,
+  //   });
+  // } catch (error) {
+  //   user.otp = undefined;
+  //   user.otpExpires = undefined;
+  //   user.otpVerified = undefined;
+  //   await user.save();
+  //   return next(new ApiError("Email could not be sent", 500));
+  // }
+  res.status(200).json({
+    success: true,
+    message: message,
+  });
+});
+
+exports.verifyOtp = asyncHandler(async (req, res, next) => {
+  const hashedCode = crypto
+    .createHash("sha256")
+    .update(req.body.otp)
+    .digest("hex");
+  const user = await UserModel.findOne({
+    otp: hashedCode,
+    otpExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(new ApiError("Invalid or expired code", 400));
   }
-  res
-    .status(200)
-    .json({ success: true, message: "Reset Code sent to your email" });
+  user.otpVerified = true;
+  await user.save();
+  res.status(200).json({
+    success: true,
+    message: "Code verified successfully",
+  });
+});
+
+// @desc  Reset Password
+// @route POST /api/v1/auth/reset-password
+// @access Public
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+  const user = await UserModel.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new ApiError("No user found with this email", 404));
+  }
+  if (!user.otpVerified) {
+    return next(new ApiError("Please verify your code first", 400));
+  }
+  user.password = req.body.newPassword;
+  user.otp = undefined;
+  user.otpExpires = undefined;
+  user.otpVerified = undefined;
+  await user.save();
+  const token = createToken(user._id);
+  res.status(200).json({
+    success: true,
+    message: "Password reset successfully",
+    accessToken: token,
+  });
 });

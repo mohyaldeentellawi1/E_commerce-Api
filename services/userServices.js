@@ -3,6 +3,7 @@ const sharp = require("sharp");
 const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
 const ApiError = require("../utils/apiError");
+const createToken = require("../middleware/creatTokenMiddleware");
 const factory = require("./handlersFactory");
 const UserModel = require("../models/userModel");
 const { uploadSingleImage } = require("../middleware/uploadImageMiddleware");
@@ -14,17 +15,17 @@ exports.getUsers = factory.getAll(UserModel, "User");
 
 // @desc   Get a specific User
 // @route  GET /api/v1/users/:id
-// @access Private (Admin , User)
+// @access Private (Admin)
 exports.getUser = factory.getOne(UserModel);
 
 // @desc   Create a new User
 // @route  POST /api/v1/users
-// @access Private (Admin , User)
+// @access Private (Admin)
 exports.createUser = factory.createOne(UserModel);
 
 // @desc   Update a User Without Password
 // @route  PUT /api/v1/users/:id
-// @access Private (Admin , User)
+// @access Private (Admin)
 exports.updateUser = asyncHandler(async (req, res, next) => {
   const document = await UserModel.findByIdAndUpdate(
     req.params.id,
@@ -78,7 +79,7 @@ exports.updateRole = asyncHandler(async (req, res, next) => {
 
 // @desc   Update a User Password
 // @route  PUT /api/v1/users/updatePassword/:id
-// @access Private (Admin , User)
+// @access Private (Admin)
 exports.updatePassword = asyncHandler(async (req, res, next) => {
   const user = await UserModel.findByIdAndUpdate(
     req.params.id,
@@ -98,7 +99,7 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
 
 // @desc   Delete a User
 // @route  DELETE /api/v1/users/:id
-// @access Private (Admin, User)
+// @access Private (Admin)
 exports.deleteUser = factory.deleteOne(UserModel);
 
 //upload Profile image
@@ -117,4 +118,59 @@ exports.imageProcessing = asyncHandler(async (req, res, next) => {
     req.body.profileImage = fileName;
   }
   next();
+});
+
+// @desc Get a Loged User Data
+// @route GET /api/v1/users/get-me
+// @access Private (User)
+exports.getLoggedUserData = asyncHandler(async (req, res, next) => {
+  req.params.id = req.user._id;
+  next();
+});
+
+// @desc Update a Logged User Password
+// @route PUT /api/v1/users/update-my-password
+// @access Private (User)
+exports.updateLoggedUserPassword = asyncHandler(async (req, res, next) => {
+  const user = await UserModel.findByIdAndUpdate(
+    req.user._id,
+    {
+      password: await bcrypt.hash(req.body.password, 12),
+      passwordChangedAt: Date.now(),
+    },
+    { new: true }
+  );
+  const token = createToken(user._id);
+  res.status(200).json({
+    success: true,
+    message: "Password Updated successfully",
+    data: user,
+    accessToken: token,
+  });
+});
+
+// @desc Update a Logged User Data Without Password
+// @route PUT /api/v1/users/update-me
+// @access Private (User)
+exports.updateLoggedUserData = asyncHandler(async (req, res, next) => {
+  const user = await UserModel.findByIdAndUpdate(
+    req.user._id,
+    {
+      name: req.body.name,
+      slug: req.body.slug,
+      email: req.body.email,
+      phone: req.body.phone,
+      profileImage: req.body.profileImage,
+    },
+    {
+      new: true,
+    }
+  );
+  const token = createToken(user._id);
+  res.status(200).json({
+    success: true,
+    message: "User Updated successfully",
+    data: user,
+    accessToken: token,
+  });
 });
