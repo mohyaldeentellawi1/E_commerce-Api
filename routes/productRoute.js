@@ -1,4 +1,5 @@
 const express = require("express");
+const reviewsRoute = require("./reviewRoute");
 const {
   getProduct,
   getProducts,
@@ -17,6 +18,10 @@ const {
 } = require("../utils/validators_rules/productValidators");
 
 const router = express.Router();
+
+// Nested Routes
+// get subcategories of a specific category
+router.use("/:productId/reviews", reviewsRoute);
 
 router
   .route("/")

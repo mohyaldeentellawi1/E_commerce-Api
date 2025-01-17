@@ -4,6 +4,22 @@ const ApiError = require("../utils/apiError");
 const factory = require("./handlersFactory");
 const ReviewModel = require("../models/reviewModel");
 
+//Middleware to set productId from params
+// api/v1/products/:productId/reviews
+// Nested Routes
+exports.setProductIdAndUserIdFromParams = (req, res, next) => {
+  if (!req.body.product) req.body.product = req.params.productId;
+  if (!req.body.user) req.body.user = req.user._id.toString();
+  next();
+};
+
+exports.createFilterObject = (req, res, next) => {
+  let filteredObject = {};
+  if (req.params.productId) filteredObject = { product: req.params.productId };
+  req.filterObj = filteredObject;
+  next();
+};
+
 // @desc   Get all Reviews
 // @route  GET /api/v1/reviews
 // @access Public
