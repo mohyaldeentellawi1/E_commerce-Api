@@ -16,9 +16,9 @@ exports.createReviewValidator = [
   check("user")
     .isMongoId()
     .withMessage("Invalid User Id")
-    .custom((userId, { req }) => {
+    .custom((userIdFromBody, { req }) => {
       const userFromToken = req.user._id.toString();
-      if (userId !== userFromToken) {
+      if (userIdFromBody !== userFromToken) {
         return Promise.reject(
           new ApiError("You can't review another user", 403)
         );
@@ -52,7 +52,9 @@ exports.updateReviewValidator = [
       if (!review) {
         return Promise.reject(new ApiError("Review not found", 404));
       }
-      if (review.user._id.toString() !== req.user._id.toString()) {
+      const storedUserInReview = review.user._id.toString();
+      const userFromToken = req.user._id.toString();
+      if (storedUserInReview !== userFromToken) {
         return Promise.reject(
           new ApiError("You are not authorized to update this review", 403)
         );
@@ -85,7 +87,9 @@ exports.deleteReviewValidator = [
         if (!review) {
           return Promise.reject(new ApiError("Review not found", 404));
         }
-        if (review.user._id.toString() !== req.user._id.toString()) {
+        const storedUserInReview = review.user._id.toString();
+        const userFromToken = req.user._id.toString();
+        if (storedUserInReview !== userFromToken) {
           return Promise.reject(
             new ApiError("You are not authorized to Delete this review", 403)
           );
