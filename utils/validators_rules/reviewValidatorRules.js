@@ -13,14 +13,25 @@ exports.createReviewValidator = [
     .withMessage("Please enter a valid review rating")
     .isFloat({ min: 1, max: 5 })
     .withMessage("Please enter a valid review rating"),
-  check("user").isMongoId().withMessage("Invalid User Id"),
+  check("user")
+    .isMongoId()
+    .withMessage("Invalid User Id")
+    .custom((userId, { req }) => {
+      const userFromToken = req.user._id.toString();
+      if (userId !== userFromToken) {
+        return Promise.reject(
+          new ApiError("You can't review another user", 403)
+        );
+      }
+      return true;
+    }),
   check("product")
     .isMongoId()
     .withMessage("Invalid Product Id")
     .custom(async (productId, { req }) => {
       const review = await ReviewModel.findOne({
         user: req.user._id,
-        product: req.body.product,
+        product: productId,
       });
       if (review) {
         return Promise.reject(
@@ -56,10 +67,6 @@ exports.updateReviewValidator = [
     .optional()
     .isFloat({ min: 1, max: 5 })
     .withMessage("Please enter a valid review rating"),
-  check("product")
-    .isEmpty()
-    .withMessage("You can't change the product of a review"),
-  check("user").isEmpty().withMessage("You can't change the user of a review"),
   validatorMiddleware,
 ];
 
