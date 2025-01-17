@@ -54,6 +54,7 @@ exports.updateReview = asyncHandler(async (req, res, next) => {
       new ApiError(`review not found with id of ${req.params.id}`, 404)
     );
   }
+  await review.save(); // Trigger "save" event in ReviewModel
   res.status(200).json({
     success: true,
     message: "review Updated successfully",
@@ -64,4 +65,14 @@ exports.updateReview = asyncHandler(async (req, res, next) => {
 // @desc   Delete a Review
 // @route  DELETE /api/v1/reviews/:id
 // @access Private/Protect/User-Admin
-exports.deleteReview = factory.deleteOne(ReviewModel);
+exports.deleteReview = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const review = await ReviewModel.findByIdAndDelete(id);
+  if (!review) {
+    return next(new ApiError(`review not found with id of ${id}`, 404));
+  }
+  await review.deleteOne(); // Trigger "findOneAndDelete" event for reviewModel
+  res
+    .status(200)
+    .json({ success: true, message: `This ${id} Deleted successfully` });
+});

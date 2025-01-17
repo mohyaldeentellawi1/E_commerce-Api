@@ -9,6 +9,7 @@ exports.deleteOne = (Model) =>
     if (!document) {
       return next(new ApiError(`document not found with id of ${id}`, 404));
     }
+    await document.deleteOne(); // Trigger "delete" event for reviewModel
     res
       .status(200)
       .json({ success: true, message: `This ${id} Deleted successfully` });
