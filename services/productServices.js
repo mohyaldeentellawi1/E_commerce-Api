@@ -48,7 +48,7 @@ exports.getProducts = factory.getAll(ProductModel, "Product");
 // @desc   Get a specific product
 // @route  GET /api/v1/products/:id
 // @access Public
-exports.getProduct = factory.getOne(ProductModel);
+exports.getProduct = factory.getOne(ProductModel, "reviews");
 // @desc   Create a new product
 // @route  POST /api/v1/products
 // @access Private

@@ -69,7 +69,12 @@ const productSchema = new mongoose.Schema(
       default: 0,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    // to enable virtuals populate
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
 productSchema.pre(/^find/, function (next) {
@@ -88,6 +93,13 @@ productSchema.pre(/^find/, function (next) {
     },
   ]);
   next();
+});
+
+// Virtual populate reviews
+productSchema.virtual("reviews", {
+  ref: "Review",
+  foreignField: "product",
+  localField: "_id",
 });
 
 // update , delete, get , getALL

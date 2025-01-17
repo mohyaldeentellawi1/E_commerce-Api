@@ -39,10 +39,14 @@ exports.createOne = (Model) =>
     });
   });
 
-exports.getOne = (Model) =>
+exports.getOne = (Model, populationOptions) =>
   asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-    const document = await Model.findById(id);
+    let query = Model.findById(id);
+    if (populationOptions) {
+      query = query.populate(populationOptions);
+    }
+    const document = await query;
     if (!document) {
       return next(new ApiError(`document not found with id of ${id}`, 404));
     }
