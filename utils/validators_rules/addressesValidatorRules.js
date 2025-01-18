@@ -40,10 +40,8 @@ exports.updateAddressValidator = [
     .notEmpty()
     .withMessage("Address Id is required")
     .custom(async (addressId, { req }) => {
-      const address = await UserModel.findById(req.user._id)
-        .populate("addresses")
-        .exec();
-      if (!address.addresses.find((a) => a._id.toString() === addressId)) {
+      const user = await UserModel.findById(req.user._id);
+      if (!user.addresses.includes(addressId)) {
         return Promise.reject(
           new ApiError("Address not found in user's addresses", 404)
         );
@@ -76,10 +74,8 @@ exports.deleteAddressValidator = [
     .notEmpty()
     .withMessage("Address Id is required")
     .custom(async (addressId, { req }) => {
-      const address = await UserModel.findById(req.user._id)
-        .populate("addresses")
-        .exec();
-      if (!address.addresses.find((a) => a._id.toString() === addressId)) {
+      const user = await UserModel.findById(req.user._id);
+      if (!user.addresses.includes(addressId)) {
         return Promise.reject(
           new ApiError("Address not found in user's addresses", 404)
         );
