@@ -64,6 +64,21 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
+// delete all reviews of specific User when the User is deleted then update ratingsAverage and ratingsQuantity of products in which the reviews are present
+UserSchema.pre("findOneAndDelete", async function (next) {
+  const userId = this.getQuery()._id;
+  const ReviewModel = mongoose.model("Review");
+  const reviews = await ReviewModel.find({ user: userId });
+  await ReviewModel.deleteMany({ user: userId });
+  const productIds = [...new Set(reviews.map((review) => review.product))];
+  await Promise.all(
+    productIds.map(async (productId) => {
+      await ReviewModel.calcAvgRatingAndQuantity(productId);
+    })
+  );
+  next();
+});
+
 // update , delete, get , getALL
 UserSchema.post("init", (doc) => {
   if (doc.profileImage) {

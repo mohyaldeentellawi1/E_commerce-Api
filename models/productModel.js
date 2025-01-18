@@ -134,6 +134,14 @@ productSchema.post("save", (doc) => {
   }
 });
 
+// delete all reviews of specific product when the product is deleted
+productSchema.pre("findOneAndDelete", async function (next) {
+  const productId = this.getQuery()._id;
+  const ReviewModel = mongoose.model("Review");
+  await ReviewModel.deleteMany({ product: productId });
+  next();
+});
+
 const ProductModel = mongoose.model("Product", productSchema);
 
 module.exports = ProductModel;
