@@ -1,4 +1,5 @@
 const express = require("express");
+const { protect, allowTo } = require("../services/authServices");
 const {
   getBrands,
   getBrand,
@@ -8,7 +9,7 @@ const {
   uploadBrandImage,
   imageProcessing,
 } = require("../services/brandServices");
-const { protect, allowTo } = require("../services/authServices");
+
 const {
   getBrandValidator,
   createBrandValidator,

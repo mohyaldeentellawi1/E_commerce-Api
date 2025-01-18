@@ -5,15 +5,7 @@ const morgan = require("morgan");
 
 dotenv.config({ path: "config.env" });
 const dbConnection = require("./config/database");
-const categoryRoute = require("./routes/categoryRoute");
-const subCategoryRoute = require("./routes/subCategoryRoute");
-const productRoute = require("./routes/productRoute");
-const brandsRoute = require("./routes/brandRoute");
-const authRoute = require("./routes/authRoute");
-const userRoute = require("./routes/userRoute");
-const reviewRoute = require("./routes/reviewRoute");
-const wishListRoute = require("./routes/wishListRoute");
-const addressRoute = require("./routes/addressRoute");
+const mountRoute = require("./routes");
 
 const ApiError = require("./utils/apiError");
 const globalError = require("./middleware/errorMiddleware");
@@ -33,15 +25,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Mount Routes
-app.use("/api/v1/categories", categoryRoute);
-app.use("/api/v1/subCategory", subCategoryRoute);
-app.use("/api/v1/brands", brandsRoute);
-app.use("/api/v1/products", productRoute);
-app.use("/api/v1/users", userRoute);
-app.use("/api/v1/auth", authRoute);
-app.use("/api/v1/reviews", reviewRoute);
-app.use("/api/v1/wishlist", wishListRoute);
-app.use("/api/v1/addresses", addressRoute);
+mountRoute(app);
 
 //create error middleware for invalid route
 app.all("*", (req, res, next) => {
