@@ -12,6 +12,8 @@ const brandsRoute = require("./routes/brandRoute");
 const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
 const reviewRoute = require("./routes/reviewRoute");
+const wishListRoute = require("./routes/wishListRoute");
+const addressRoute = require("./routes/addressRoute");
 
 const ApiError = require("./utils/apiError");
 const globalError = require("./middleware/errorMiddleware");
@@ -38,6 +40,8 @@ app.use("/api/v1/products", productRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/reviews", reviewRoute);
+app.use("/api/v1/wishlist", wishListRoute);
+app.use("/api/v1/addresses", addressRoute);
 
 //create error middleware for invalid route
 app.all("*", (req, res, next) => {
