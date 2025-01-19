@@ -24,7 +24,7 @@ exports.addToCartValidator = [
       const product = await ProductModel.findById(productId);
       if (!product.colors.includes(val)) {
         return Promise.reject(
-          new ApiError(`Color ${val} is not available`, 400)
+          new ApiError(`Color ${val} is not available`, 403)
         );
       }
       return true;
