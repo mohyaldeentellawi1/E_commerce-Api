@@ -90,6 +90,9 @@ exports.removeItemFromCart = asyncHandler(async (req, res, next) => {
     { $pull: { cartItems: { _id: req.params.itemId } } },
     { new: true }
   );
+  if (!cart) {
+    return next(new ApiError("Cart not found for this user", 404));
+  }
   calcTotalCartPrice(cart);
   await cart.save();
   res.status(200).json({
@@ -100,7 +103,7 @@ exports.removeItemFromCart = asyncHandler(async (req, res, next) => {
 });
 
 // @desc   Clear User Cart
-// @route  DELETE /api/v1/cart/cartId
+// @route  DELETE /api/v1/cart/
 // @access Private (User)
 exports.clearUserCart = asyncHandler(async (req, res, next) => {
   await CartModel.findOneAndDelete({ user: req.user._id });

@@ -11,6 +11,8 @@ const {
 } = require("../services/cartServices");
 const {
   addToCartValidator,
+  updateQuantityForItemValidator,
+  removeItemFromCartValidator,
 } = require("../utils/validators_rules/userCartValidatorRules");
 
 const router = express.Router();
@@ -21,11 +23,21 @@ router
   .get(protect, allowTo("user"), getLoggedUserCart)
   .delete(protect, allowTo("user"), clearUserCart);
 
-router.route("/:applyCoupon").put(protect, allowTo("user"), applyCoupon);
+router.put("/applyCoupon", protect, allowTo("user"), applyCoupon);
 
 router
   .route("/:itemId")
-  .put(protect, allowTo("user"), updateQuantityForItem)
-  .delete(protect, allowTo("user"), removeItemFromCart);
+  .put(
+    protect,
+    allowTo("user"),
+    updateQuantityForItemValidator,
+    updateQuantityForItem
+  )
+  .delete(
+    protect,
+    allowTo("user"),
+    removeItemFromCartValidator,
+    removeItemFromCart
+  );
 
 module.exports = router;
