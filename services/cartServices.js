@@ -62,3 +62,18 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
     data: cart,
   });
 });
+
+// @desc   gte logged user cart
+// @route  GET /api/v1/cart
+// @access Private (User)
+exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
+  const cart = await CartModel.findOne({ user: req.user._id });
+  if (!cart) {
+    return next(new ApiError("Cart not found for this user", 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: "Cart retrieved successfully",
+    data: cart,
+  });
+});
