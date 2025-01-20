@@ -44,3 +44,29 @@ exports.createNewOrder = asyncHandler(async (req, res, next) => {
     data: order,
   });
 });
+
+// @desc   Get Logged User Orders
+// @route  GET /api/v1/orders
+// @access Private (User and Admin)
+exports.getOrders = asyncHandler(async (req, res, next) => {
+  const query = req.user.role === "user" ? { user: req.user._id } : {};
+  const orders = await OrderModel.find(query);
+  if (orders.length > 0) {
+    const message =
+      req.user.role === "user"
+        ? "User's orders fetched successfully"
+        : "All orders fetched successfully for Admin";
+    res.status(200).json({
+      status: true,
+      message: message,
+      result: orders.length,
+      data: orders,
+    });
+  } else {
+    const message =
+      req.user.role === "user"
+        ? "No orders found for this user"
+        : "No orders found";
+    return next(new ApiError(message, 404));
+  }
+});
