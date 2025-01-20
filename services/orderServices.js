@@ -1,3 +1,5 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const asyncHandler = require("express-async-handler");
 const ApiError = require("../utils/apiError");
 const factory = require("./handlersFactory");
@@ -77,4 +79,84 @@ exports.getOrder = asyncHandler(async (req, res, next) => {
   } else {
     return next(new ApiError("Unauthorized to view this order", 403));
   }
+});
+
+// @desc   Update Order Status to Paid
+// @route  PUT /api/v1/orders/:orderId/pay
+// @access Private (Admin)
+exports.updateOrderPaidStatus = asyncHandler(async (req, res, next) => {
+  const order = await OrderModel.findById(req.params.id);
+  if (!order) {
+    return next(new ApiError("Order not found", 404));
+  }
+  order.isPaid = true;
+  order.paidAt = Date.now();
+  await order.save();
+  res.status(200).json({
+    status: true,
+    message: "Order Paid Status updated successfully",
+    data: order,
+  });
+});
+
+// @desc   Update Order Status to Deliverd
+// @route  PUT /api/v1/orders/:orderId/deliver
+// @access Private (Admin)
+exports.updateOrderDeliverStatus = asyncHandler(async (req, res, next) => {
+  const order = await OrderModel.findById(req.params.id);
+  if (!order) {
+    return next(new ApiError("Order not found", 404));
+  }
+  order.isDelivered = true;
+  order.deliveredAt = Date.now();
+  await order.save();
+  res.status(200).json({
+    status: true,
+    message: "Order was successfully delivered",
+    data: order,
+  });
+});
+
+// @desc   Get checkout session from stripe and send it as response
+// @route  GET /api/v1/orders/checkout-session/:cartId
+// @access Private (User)
+exports.checkoutSession = asyncHandler(async (req, res, next) => {
+  // App Settings By Admin (Admin Can Update this values if he wants)
+  const taxPrice = 0;
+  const shippingPrice = 0;
+
+  const cart = await CartModel.findById(req.params.cartId);
+  if (!cart) {
+    return next(new ApiError("Cart not found", 404));
+  }
+  const cartPrice = cart.totalPriceAfterDiscount
+    ? cart.totalPriceAfterDiscount
+    : cart.totalCartPrice;
+
+  const totalOrderPrice = cartPrice + taxPrice + shippingPrice;
+  const session = await stripe.checkout.sessions.create({
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `Order by ${req.user.name}`,
+          },
+          unit_amount: totalOrderPrice * 100,
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: `${req.protocol}://${req.get("host")}/orders`,
+    cancel_url: `${req.protocol}://${req.get("host")}/cart`,
+    customer_email: req.user.email,
+    client_reference_id: req.params.cartId,
+    metadata: req.body.shippingAddress,
+  });
+  res.status(200).json({
+    status: true,
+    message: "Checkout session created successfully",
+    data: session,
+  });
 });

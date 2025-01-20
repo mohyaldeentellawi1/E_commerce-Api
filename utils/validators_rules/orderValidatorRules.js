@@ -28,7 +28,7 @@ exports.createNewOrdeValidator = [
   validatorMiddleware,
 ];
 
-exports.getOrderByIdValidator = [
+exports.checkOrderIdValidator = [
   check("id")
     .notEmpty()
     .withMessage("Please enter an order id")

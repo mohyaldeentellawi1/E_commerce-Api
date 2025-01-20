@@ -13,7 +13,8 @@
     "no-return-await": "off",
     "no-underscore-dangle": "off",
     "class-methods-use-this": "off",
-    "node/no-unsupported-features": "off",
+    "no-unsupported-features": "off",
+    "no-extraneous-dependencies": "off",
     "no-undef": "error",
     "prefer-destructuring": [
       "error",
