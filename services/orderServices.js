@@ -161,6 +161,34 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
   });
 });
 
+const createCardOrder = async (session) => {
+  const cartId = session.client_reference_id;
+  const shippingAddress = session.metadat;
+  const orderPrice = session.display_items[0].amount / 100;
+  const cart = await CartModel.findById(cartId);
+  const user = await UserModel.findOne({ email: session.customer_email });
+
+  const order = await OrderModel.create({
+    user: user._id,
+    cartItems: cart.cartItems,
+    shippingAddress: shippingAddress,
+    totalOrderPrice: orderPrice,
+    isPaid: true,
+    paidAt: Date.now(),
+    paymentMethodeType: "creditCard",
+  });
+  if (order) {
+    const bulkOptions = cart.cartItems.map((item) => ({
+      updateOne: {
+        filter: { _id: item.product },
+        update: { $inc: { quantity: -item.quantity, sold: +item.quantity } },
+      },
+    }));
+    await ProductModel.bulkWrite(bulkOptions, {});
+    await CartModel.findByIdAndDelete(cartId);
+  }
+};
+
 exports.webhookCheckout = asyncHandler(async (req, res, next) => {
   let event = req.body;
   const signature = req.headers["stripe-signature"];
@@ -176,9 +204,7 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
     return res.sendStatus(400).send(`Webhook Error: ${e.message}`);
   }
   if (event.type === "checkout.session.completed") {
-    console.log(
-      `Referenced id ${JSON.stringify(event.data.object.client_reference_id)}`
-    );
-    console.log("Create Order Here .........................");
+    createCardOrder(event.data.object);
   }
+  res.status(200).send({ success: true });
 });
