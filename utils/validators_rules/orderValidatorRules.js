@@ -27,3 +27,12 @@ exports.createNewOrdeValidator = [
     .withMessage("Invalid postal code"),
   validatorMiddleware,
 ];
+
+exports.getOrderByIdValidator = [
+  check("id")
+    .notEmpty()
+    .withMessage("Please enter an order id")
+    .isMongoId()
+    .withMessage("Invalid order id"),
+  validatorMiddleware,
+];

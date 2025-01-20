@@ -1,9 +1,10 @@
 const asyncHandler = require("express-async-handler");
 const ApiError = require("../utils/apiError");
-
+const factory = require("./handlersFactory");
 const ProductModel = require("../models/productModel");
 const CartModel = require("../models/cartModel");
 const OrderModel = require("../models/orderModel");
+const UserModel = require("../models/userModel");
 
 // @desc   Create Order
 // @route  POST /api/v1/orders/:cartId
@@ -45,28 +46,35 @@ exports.createNewOrder = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.filterOrdersForLoggedUser = asyncHandler(async (req, res, next) => {
+  if (req.user.role === "user") req.filterObj = { user: req.user._id };
+  next();
+});
+
 // @desc   Get Logged User Orders
 // @route  GET /api/v1/orders
 // @access Private (User and Admin)
-exports.getOrders = asyncHandler(async (req, res, next) => {
-  const query = req.user.role === "user" ? { user: req.user._id } : {};
-  const orders = await OrderModel.find(query);
-  if (orders.length > 0) {
-    const message =
-      req.user.role === "user"
-        ? "User's orders fetched successfully"
-        : "All orders fetched successfully for Admin";
+exports.getOrders = factory.getAll(OrderModel, "Order");
+
+// @desc   Get Specific Order
+// @route  GET /api/v1/orders/:orderId
+// @access Private (User and Admin)
+exports.getOrder = asyncHandler(async (req, res, next) => {
+  const user = await UserModel.findById(req.user._id);
+  const order = await OrderModel.findById(req.params.id);
+  if (!order) {
+    return next(new ApiError("Order not found", 404));
+  }
+  if (
+    user.role === "admin" ||
+    (user.role === "user" && order.user._id.toString() === user._id.toString())
+  ) {
     res.status(200).json({
       status: true,
-      message: message,
-      result: orders.length,
-      data: orders,
+      message: "Order fetched successfully",
+      data: order,
     });
   } else {
-    const message =
-      req.user.role === "user"
-        ? "No orders found for this user"
-        : "No orders found";
-    return next(new ApiError(message, 404));
+    return next(new ApiError("Unauthorized to view this order", 403));
   }
 });
