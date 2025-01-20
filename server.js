@@ -8,7 +8,7 @@ const morgan = require("morgan");
 
 dotenv.config({ path: "config.env" });
 const dbConnection = require("./config/database");
-const mountRoute = require("./routes");
+const mountRoute = require("./routes/index");
 const ApiError = require("./utils/apiError");
 const globalError = require("./middleware/errorMiddleware");
 
