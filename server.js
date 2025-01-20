@@ -2,6 +2,7 @@
 const path = require("path");
 const express = require("express");
 const cors = require("cors");
+const compression = require("compression");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 
@@ -14,9 +15,12 @@ const globalError = require("./middleware/errorMiddleware");
 // express app
 const app = express();
 
-// CORS
+// CORS Enable another domains to access this server
 app.use(cors());
 app.options("*", cors());
+
+// Compress All Responses
+app.use(compression());
 
 // Database Connection
 dbConnection();
