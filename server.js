@@ -1,17 +1,22 @@
+/* eslint-disable import/no-extraneous-dependencies */
 const path = require("path");
 const express = require("express");
+const cors = require("cors");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 
 dotenv.config({ path: "config.env" });
 const dbConnection = require("./config/database");
 const mountRoute = require("./routes");
-
 const ApiError = require("./utils/apiError");
 const globalError = require("./middleware/errorMiddleware");
 
 // express app
 const app = express();
+
+// CORS
+app.use(cors());
+app.options("*", cors());
 
 // Database Connection
 dbConnection();
