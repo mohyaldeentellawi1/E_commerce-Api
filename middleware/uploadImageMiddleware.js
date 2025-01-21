@@ -3,10 +3,10 @@ const ApiError = require("../utils/apiError");
 
 const multerOption = () => {
   // // memory storage engine as buffer
-  // const multerStorage = multer.memoryStorage();
+  const multerStorage = multer.memoryStorage();
 
-  // disk storage engine as file
-  const multerDiskStorage = multer.diskStorage();
+  // // disk storage engine as file
+  // const multerDiskStorage = multer.diskStorage();
 
   // Multer Filter
   const multerFilter = (req, file, cb) => {
@@ -17,7 +17,7 @@ const multerOption = () => {
     }
   };
   const upload = multer({
-    storage: multerDiskStorage,
+    storage: multerStorage,
     fileFilter: multerFilter,
   });
   return upload;
