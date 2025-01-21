@@ -34,7 +34,7 @@ app.post(
 dbConnection();
 
 // Middlewares
-app.use(express.json()); // for parsing json data
+app.use(express.json({ limit: "20kb" })); // for parsing json data and set size limit to 20kb
 app.use(express.static(path.join(__dirname, "uploads"))); // for serving static files
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev")); // Request logger
