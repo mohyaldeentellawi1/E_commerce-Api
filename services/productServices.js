@@ -1,9 +1,11 @@
 const asyncHandler = require("express-async-handler");
 const sharp = require("sharp");
+const cloudinary = require("cloudinary").v2;
 const { v4: uuidv4 } = require("uuid");
 const ProductModel = require("../models/productModel");
 const { uploadMultipleImages } = require("../middleware/uploadImageMiddleware");
 const factory = require("./handlersFactory");
+const ApiError = require("../utils/apiError");
 
 exports.uploadProductImages = uploadMultipleImages([
   { name: "imageCover", maxCount: 1 },
@@ -12,30 +14,47 @@ exports.uploadProductImages = uploadMultipleImages([
 
 // @desc   Image processing for image cover and images for product
 exports.productImageProcessing = asyncHandler(async (req, res, next) => {
-  if (req.files.imageCover) {
-    const imageCoverFileName = `product-${uuidv4()}-${Date.now()}-cover.jpeg`;
-    await sharp(req.files.imageCover[0].buffer)
-      .resize(2000, 1333)
-      .toFormat("jpeg")
-      .jpeg({ quality: 95 })
-      .toFile(`uploads/products/${imageCoverFileName}`);
-    // Save the image cover name in Database
-    req.body.imageCover = imageCoverFileName;
-  }
-  if (req.files.images) {
-    req.body.images = [];
-    await Promise.all(
-      req.files.images.map(async (image, index) => {
-        const imageName = `product-${uuidv4()}-${Date.now()}-${index + 1}.jpeg`;
-        await sharp(image.buffer)
-          .resize(2000, 1333)
-          .toFormat("jpeg")
-          .jpeg({ quality: 95 })
-          .toFile(`uploads/products/${imageName}`);
-        // Save the images name in Database
-        req.body.images.push(imageName);
-      })
-    );
+  if (process.env.NODE_ENV === "production") {
+    if (req.file.imageCover) {
+      const result = cloudinary.uploader.upload_stream(
+        {
+          folder: "products",
+        },
+        (error) => {
+          if (error) {
+            return next(new ApiError("Image upload failed", 400));
+          }
+          req.body.imageCover = result.secure_url;
+        }
+      );
+      result.end(req.file.imageCover[0].buffer);
+    }
+  } else {
+    if (req.files.imageCover) {
+      const imageCoverFileName = `product-${uuidv4()}-${Date.now()}-cover.jpeg`;
+      await sharp(req.files.imageCover[0].buffer)
+        .resize(2000, 1333)
+        .toFormat("jpeg")
+        .jpeg({ quality: 95 })
+        .toFile(`uploads/products/${imageCoverFileName}`);
+      // Save the image cover name in Database
+      req.body.imageCover = imageCoverFileName;
+    }
+    if (req.files.images) {
+      req.body.images = [];
+      await Promise.all(
+        req.files.images.map(async (image, index) => {
+          const imageName = `product-${uuidv4()}-${Date.now()}-${index + 1}.jpeg`;
+          await sharp(image.buffer)
+            .resize(2000, 1333)
+            .toFormat("jpeg")
+            .jpeg({ quality: 95 })
+            .toFile(`uploads/products/${imageName}`);
+          // Save the images name in Database
+          req.body.images.push(imageName);
+        })
+      );
+    }
   }
   next();
 });

@@ -15,6 +15,7 @@
     "class-methods-use-this": "off",
     "no-unsupported-features": "off",
     "no-extraneous-dependencies": "off",
+    "import/no-extraneous-dependencies": "off",
     "no-undef": "error",
     "prefer-destructuring": [
       "error",
