@@ -39,15 +39,15 @@ exports.createProductValidator = [
   check("price")
     .notEmpty()
     .withMessage("Product Price is required")
-    .isNumeric()
+    .isNumeric({ min: 0 })
     .withMessage("Product Price should be a number")
-    .toFloat({ min: 0 })
+    .toFloat()
     .withMessage("Product Price should be a positive number"),
   check("priceAfterDiscount")
     .optional()
-    .isNumeric()
+    .isNumeric({ min: 0 })
     .withMessage("Product Price After Discount should be a number")
-    .toFloat({ min: 0 })
+    .toFloat()
     .custom((value, { req }) => {
       if (req.body.price <= value) {
         return Promise.reject(
@@ -58,7 +58,7 @@ exports.createProductValidator = [
     }),
   check("colors")
     .optional()
-    .isArray()
+    .isArray({ min: 1 })
     .withMessage("Product Colors should be an array"),
   check("imageCover").notEmpty().withMessage("Product Image is required"),
   check("images")
@@ -164,14 +164,14 @@ exports.updateProductValidator = [
     .withMessage("Product Sold should be a number"),
   check("price")
     .optional()
-    .isNumeric()
+    .isNumeric({ min: 0 })
     .withMessage("Product Price should be a number")
-    .toFloat({ min: 0 })
+    .toFloat()
     .withMessage("Product Price should be a positive number"),
   check("priceAfterDiscount")
     .optional()
-    .isNumeric()
-    .toFloat({ min: 0 })
+    .isNumeric({ min: 0 })
+    .toFloat()
     .withMessage("Product Price After Discount should be a number")
     .custom(async (value, { req }) => {
       let { price } = req.body;
