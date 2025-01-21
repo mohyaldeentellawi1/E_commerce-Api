@@ -2,8 +2,12 @@ const multer = require("multer");
 const ApiError = require("../utils/apiError");
 
 const multerOption = () => {
-  // memory storage engine as buffer
-  const multerStorage = multer.memoryStorage();
+  // // memory storage engine as buffer
+  // const multerStorage = multer.memoryStorage();
+
+  // disk storage engine as file
+  const multerDiskStorage = multer.diskStorage();
+
   // Multer Filter
   const multerFilter = (req, file, cb) => {
     if (file.mimetype.startsWith("image")) {
@@ -12,7 +16,10 @@ const multerOption = () => {
       cb(new ApiError("Not an image! Please upload only images.", 400), false);
     }
   };
-  const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+  const upload = multer({
+    storage: multerDiskStorage,
+    fileFilter: multerFilter,
+  });
   return upload;
 };
 

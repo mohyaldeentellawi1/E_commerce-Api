@@ -17,15 +17,12 @@ exports.productImageProcessing = asyncHandler(async (req, res, next) => {
   if (process.env.NODE_ENV === "production") {
     if (req.file.imageCover) {
       try {
-        const result = await cloudinary.uploader.upload(
-          req.file.imageCover[0].buffer,
-          {
-            use_filename: true,
-            unique_filename: false,
-            overwrite: true,
-          }
-        );
-        req.body.imageCover = result.public_id;
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          use_filename: true,
+          unique_filename: false,
+          overwrite: true,
+        });
+        req.body.imageCover = result.secure_url;
       } catch (e) {
         return next(new ApiError("Error uploading image", 500));
       }
