@@ -16,18 +16,19 @@ exports.uploadProductImages = uploadMultipleImages([
 exports.productImageProcessing = asyncHandler(async (req, res, next) => {
   if (process.env.NODE_ENV === "production") {
     if (req.file.imageCover) {
-      const result = cloudinary.uploader.upload_stream(
-        {
-          folder: "products",
-        },
-        (error) => {
-          if (error) {
-            return next(new ApiError("Image upload failed", 400));
+      try {
+        const result = await cloudinary.uploader.upload(
+          req.file.imageCover[0].buffer,
+          {
+            use_filename: true,
+            unique_filename: false,
+            overwrite: true,
           }
-          req.body.imageCover = result.secure_url;
-        }
-      );
-      result.end(req.file.imageCover[0].buffer);
+        );
+        req.body.imageCover = result.public_id;
+      } catch (e) {
+        return next(new ApiError("Error uploading image", 500));
+      }
     }
   } else {
     if (req.files.imageCover) {
