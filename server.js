@@ -3,6 +3,7 @@ const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const compression = require("compression");
+const hpp = require("hpp");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 
@@ -40,6 +41,20 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev")); // Request logger
   console.log(`mode : ${process.env.NODE_ENV}`);
 }
+
+// Prevent HTTP Parameter Pollution
+app.use(
+  hpp({
+    whitelist: [
+      "quantity",
+      "sold",
+      "price",
+      "priceAfterDiscount",
+      "ratingsAverage",
+      "ratingsQuantity",
+    ],
+  })
+);
 
 // Mount Routes
 mountRoute(app);
