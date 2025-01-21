@@ -4,6 +4,8 @@ const express = require("express");
 const cors = require("cors");
 const compression = require("compression");
 const hpp = require("hpp");
+const mongoSanitize = require("express-mongo-sanitize");
+
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 
@@ -41,6 +43,9 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev")); // Request logger
   console.log(`mode : ${process.env.NODE_ENV}`);
 }
+
+// To Apply Data Sanilization against NoSQL Query Injection
+app.use(mongoSanitize());
 
 // Prevent HTTP Parameter Pollution
 app.use(

@@ -18,6 +18,10 @@ exports.register = asyncHandler(async (req, res) => {
     email: req.body.email,
     password: req.body.password,
   });
+  user.password = undefined;
+  user.wishList = undefined;
+  user.addresses = undefined;
+  user.otpVerified = undefined;
   const token = createToken(user._id);
   res.status(201).json({
     success: true,
@@ -46,6 +50,10 @@ exports.login = asyncHandler(async (req, res, next) => {
     user.active = true;
     await user.save();
   }
+  user.password = undefined;
+  user.wishList = undefined;
+  user.addresses = undefined;
+  user.otpVerified = undefined;
   const token = createToken(user._id);
   res.status(200).json({
     success: true,
