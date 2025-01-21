@@ -27,14 +27,6 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-reviewSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: "user",
-    select: "name profileImage",
-  });
-  next();
-});
-
 reviewSchema.statics.calcAvgRatingAndQuantity = async function (productId) {
   const result = await this.aggregate([
     {
