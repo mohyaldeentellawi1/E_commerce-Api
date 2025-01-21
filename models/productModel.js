@@ -77,24 +77,6 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-productSchema.pre(/^find/, function (next) {
-  this.populate([
-    {
-      path: "category",
-      select: "name",
-    },
-    {
-      path: "subcategories",
-      select: "name",
-    },
-    {
-      path: "brand",
-      select: "name",
-    },
-  ]);
-  next();
-});
-
 // Virtual populate reviews
 productSchema.virtual("reviews", {
   ref: "Review",

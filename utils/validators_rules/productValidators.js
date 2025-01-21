@@ -29,22 +29,25 @@ exports.createProductValidator = [
     .notEmpty()
     .withMessage("Product Quantity is required")
     .isNumeric()
+    .isInt({ min: 0 })
     .withMessage("Product Quantity should be a number"),
   check("sold")
     .optional()
     .isNumeric()
+    .isInt({ min: 0 })
     .withMessage("Product Sold should be a number"),
   check("price")
     .notEmpty()
     .withMessage("Product Price is required")
     .isNumeric()
     .withMessage("Product Price should be a number")
-    .toFloat(),
+    .toFloat({ min: 0 })
+    .withMessage("Product Price should be a positive number"),
   check("priceAfterDiscount")
     .optional()
     .isNumeric()
     .withMessage("Product Price After Discount should be a number")
-    .toFloat()
+    .toFloat({ min: 0 })
     .custom((value, { req }) => {
       if (req.body.price <= value) {
         return Promise.reject(
@@ -60,7 +63,7 @@ exports.createProductValidator = [
   check("imageCover").notEmpty().withMessage("Product Image is required"),
   check("images")
     .optional()
-    .isArray()
+    .isArray({ min: 1 })
     .withMessage("Product Images should be an array"),
   check("category")
     .notEmpty()
@@ -77,8 +80,7 @@ exports.createProductValidator = [
   check("subcategories")
     .optional()
     .isMongoId()
-    .withMessage("Invalid Id Format")
-    .isArray()
+    .isArray({ min: 1 })
     .withMessage("Product Subcategories should be an array")
     .custom((subcategoriesIDs) =>
       SubCategoryM.find({
@@ -120,6 +122,7 @@ exports.createProductValidator = [
   check("ratingsAverage")
     .optional()
     .isNumeric()
+    .toFloat()
     .withMessage("Product Ratings Average should be a number")
     .isLength({ min: 1 })
     .withMessage("Product Ratings Average should be at least 1")
@@ -128,6 +131,7 @@ exports.createProductValidator = [
   check("ratingsQuantity")
     .optional()
     .isNumeric()
+    .isInt({ min: 0 })
     .withMessage("Product Ratings Quantity should be a number"),
   validatorMiddleware,
 ];
@@ -151,21 +155,24 @@ exports.updateProductValidator = [
   check("quantity")
     .optional()
     .isNumeric()
+    .isInt({ min: 0 })
     .withMessage("Product Quantity should be a number"),
   check("sold")
     .optional()
     .isNumeric()
+    .isInt({ min: 0 })
     .withMessage("Product Sold should be a number"),
   check("price")
     .optional()
     .isNumeric()
     .withMessage("Product Price should be a number")
-    .toFloat(),
+    .toFloat({ min: 0 })
+    .withMessage("Product Price should be a positive number"),
   check("priceAfterDiscount")
     .optional()
     .isNumeric()
+    .toFloat({ min: 0 })
     .withMessage("Product Price After Discount should be a number")
-    .toFloat()
     .custom(async (value, { req }) => {
       let { price } = req.body;
       if (!price) {
@@ -184,12 +191,12 @@ exports.updateProductValidator = [
     }),
   check("colors")
     .optional()
-    .isArray()
+    .isArray({ min: 1 })
     .withMessage("Product Colors should be an array"),
   check("imageCover").optional(),
   check("images")
     .optional()
-    .isArray()
+    .isArray({ min: 1 })
     .withMessage("Product Images should be an array"),
   check("category")
     .optional()
@@ -205,7 +212,8 @@ exports.updateProductValidator = [
   check("subcategories")
     .optional()
     .isMongoId()
-    .withMessage("Invalid Id Format")
+    .isArray({ min: 1 })
+    .withMessage("Product Subcategories should be an array")
     .custom((subcategoriesIDs) =>
       SubCategoryM.find({
         _id: { $exists: true, $in: subcategoriesIDs },
@@ -217,24 +225,6 @@ exports.updateProductValidator = [
       })
     )
     .custom(async (val, { req }) => {
-      if (!req.body.category) {
-        return Promise.reject(new ApiError("Category is required", 400));
-      }
-      SubCategoryM.find({ category: req.body.category }).then(
-        (subCategories) => {
-          const subCategoriesInDB = [];
-          subCategories.forEach((subCategory) => {
-            subCategoriesInDB.push(subCategory._id.toString());
-          });
-          const checker = val.every((v) => subCategoriesInDB.includes(v));
-          if (!checker) {
-            return Promise.reject(
-              new ApiError("SubCategory not found in this category", 404)
-            );
-          }
-          return true;
-        }
-      );
       const subCategories = await SubCategoryM.find({
         category: req.body.category,
       });
@@ -248,6 +238,7 @@ exports.updateProductValidator = [
           new ApiError("SubCategory not found in this category", 404)
         );
       }
+      return true;
     }),
   check("brand")
     .optional()
@@ -263,6 +254,7 @@ exports.updateProductValidator = [
   check("ratingsAverage")
     .optional()
     .isNumeric()
+    .toFloat()
     .withMessage("Product Ratings Average should be a number")
     .isLength({ min: 1 })
     .withMessage("Product Ratings Average should be at least 1")
@@ -271,6 +263,7 @@ exports.updateProductValidator = [
   check("ratingsQuantity")
     .optional()
     .isNumeric()
+    .isInt({ min: 0 })
     .withMessage("Product Ratings Quantity should be a number"),
   validatorMiddleware,
 ];
