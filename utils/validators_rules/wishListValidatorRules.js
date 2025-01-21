@@ -2,6 +2,7 @@ const { check } = require("express-validator");
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
 const ApiError = require("../apiError");
 const UserModel = require("../../models/userModel");
+const ProductModel = require("../../models/productModel");
 
 exports.addProductToWishListValidator = [
   check("productId")
@@ -10,7 +11,14 @@ exports.addProductToWishListValidator = [
     .notEmpty()
     .withMessage("Product Id is required")
     .isString()
-    .withMessage("Product Id should be a string"),
+    .withMessage("Product Id should be a string")
+    .custom(async (val, { req }) => {
+      const product = await ProductModel.findById(val);
+      if (!product) {
+        return Promise.reject(new ApiError("Product not found", 404));
+      }
+      return true;
+    }),
   validatorMiddleware,
 ];
 
