@@ -29,26 +29,49 @@ exports.createProductValidator = [
     .notEmpty()
     .withMessage("Product Quantity is required")
     .isNumeric()
-    .isInt({ min: 0 })
-    .withMessage("Product Quantity should be a number"),
+    .isInt()
+    .withMessage("Product Quantity should be a  Int number")
+    .custom((value, { req }) => {
+      if (value <= 0) {
+        return Promise.reject(
+          new ApiError("Product Quantity should be a positive number", 400)
+        );
+      }
+      return true;
+    }),
   check("sold")
     .optional()
     .isNumeric()
-    .isInt({ min: 0 })
-    .withMessage("Product Sold should be a number"),
+    .isInt()
+    .withMessage("Product Sold should be a Int number"),
   check("price")
     .notEmpty()
     .withMessage("Product Price is required")
-    .isNumeric({ min: 0 })
+    .isNumeric()
     .withMessage("Product Price should be a number")
     .toFloat()
-    .withMessage("Product Price should be a positive number"),
+    .custom((value, { req }) => {
+      if (value <= 0) {
+        return Promise.reject(
+          new ApiError("Product Price should be a positive number", 400)
+        );
+      }
+      return true;
+    }),
   check("priceAfterDiscount")
     .optional()
-    .isNumeric({ min: 0 })
+    .isNumeric()
     .withMessage("Product Price After Discount should be a number")
     .toFloat()
     .custom((value, { req }) => {
+      if (value <= 0) {
+        return Promise.reject(
+          new ApiError(
+            "Product Price After Discount should be a positive number",
+            400
+          )
+        );
+      }
       if (req.body.price <= value) {
         return Promise.reject(
           new ApiError("Price After Discount must be less than Price", 400)
@@ -155,8 +178,16 @@ exports.updateProductValidator = [
   check("quantity")
     .optional()
     .isNumeric()
-    .isInt({ min: 0 })
-    .withMessage("Product Quantity should be a number"),
+    .isInt()
+    .withMessage("Product Quantity should be a  Int number")
+    .custom((value, { req }) => {
+      if (value <= 0) {
+        return Promise.reject(
+          new ApiError("Product Quantity should be a positive number", 400)
+        );
+      }
+      return true;
+    }),
   check("sold")
     .optional()
     .isNumeric()
@@ -164,13 +195,21 @@ exports.updateProductValidator = [
     .withMessage("Product Sold should be a number"),
   check("price")
     .optional()
-    .isNumeric({ min: 0 })
+    .isNumeric()
     .withMessage("Product Price should be a number")
     .toFloat()
-    .withMessage("Product Price should be a positive number"),
+    .custom((value, { req }) => {
+      if (value <= 0) {
+        return Promise.reject(
+          new ApiError("Product Price should be a positive number", 400)
+        );
+      }
+      return true;
+    }),
   check("priceAfterDiscount")
     .optional()
-    .isNumeric({ min: 0 })
+    .isNumeric()
+    .withMessage("Product Price After Discount should be a number")
     .toFloat()
     .withMessage("Product Price After Discount should be a number")
     .custom(async (value, { req }) => {
@@ -181,6 +220,14 @@ exports.updateProductValidator = [
           return Promise.reject(new ApiError("Product not found", 404));
         }
         ({ price } = product);
+      }
+      if (value <= 0) {
+        return Promise.reject(
+          new ApiError(
+            "Product Price After Discount should be a positive number",
+            400
+          )
+        );
       }
       if (price <= value) {
         return Promise.reject(
