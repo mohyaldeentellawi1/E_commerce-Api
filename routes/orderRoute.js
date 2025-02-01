@@ -24,6 +24,7 @@ router
 router
   .route("/")
   .get(protect, allowTo("admin", "user"), filterOrdersForLoggedUser, getOrders);
+
 router
   .route("/:id")
   .get(protect, allowTo("admin", "user"), checkOrderIdValidator, getOrder);
