@@ -32,7 +32,7 @@ exports.createProductValidator = [
     .isInt()
     .withMessage("Product Quantity should be a  Int number")
     .custom((value, { req }) => {
-      if (value <= 0) {
+      if (value < 0) {
         return Promise.reject(
           new ApiError("Product Quantity should be a positive number", 400)
         );
@@ -181,7 +181,7 @@ exports.updateProductValidator = [
     .isInt()
     .withMessage("Product Quantity should be a  Int number")
     .custom((value, { req }) => {
-      if (value <= 0) {
+      if (value < 0) {
         return Promise.reject(
           new ApiError("Product Quantity should be a positive number", 400)
         );
