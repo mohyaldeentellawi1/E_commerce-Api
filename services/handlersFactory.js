@@ -31,7 +31,14 @@ exports.updateOne = (Model) =>
   });
 
 exports.createOne = (Model) =>
-  asyncHandler(async (req, res) => {
+  asyncHandler(async (req, res, next) => {
+    const existingDocumentName = await Model.findOne({ name: req.body.name });
+    const existingDocumentTitle = await Model.findOne({
+      title: req.body.title,
+    });
+    if (existingDocumentName || existingDocumentTitle) {
+      return next(new ApiError("Document already exists with this name", 400));
+    }
     const newDocument = await Model.create(req.body);
     res.status(201).json({
       success: true,
