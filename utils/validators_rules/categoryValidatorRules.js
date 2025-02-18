@@ -1,6 +1,8 @@
 const { check } = require("express-validator");
 const slugify = require("slugify");
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
+const CategoryModel = require("../../models/categoryModel");
+const ApiError = require("../apiError");
 
 exports.createCategoryValidator = [
   check("name")
@@ -14,6 +16,15 @@ exports.createCategoryValidator = [
     .withMessage("Category Name should be a string")
     .custom((val, { req }) => {
       req.body.slug = slugify(val);
+      return true;
+    })
+    .custom((val) => {
+      const category = CategoryModel.findOne({ name: val });
+      if (category) {
+        return Promise.reject(
+          new ApiError("Category with this name already exists", 400)
+        );
+      }
       return true;
     }),
   validatorMiddleware,

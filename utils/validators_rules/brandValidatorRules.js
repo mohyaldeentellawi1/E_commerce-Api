@@ -1,6 +1,8 @@
 const { check } = require("express-validator");
 const slugify = require("slugify");
 const validatorMiddleware = require("../../middleware/validatorMiddleware");
+const BrandModel = require("../../models/brandsModel");
+const ApiError = require("../apiError");
 
 exports.createBrandValidator = [
   check("name")
@@ -14,6 +16,15 @@ exports.createBrandValidator = [
     .withMessage("Brand Name should be a string")
     .custom((val, { req }) => {
       req.body.slug = slugify(val);
+      return true;
+    })
+    .custom((val) => {
+      const brand = BrandModel.findOne({ name: val });
+      if (brand) {
+        return Promise.reject(
+          new ApiError("Brand with this name already exists", 400)
+        );
+      }
       return true;
     }),
   validatorMiddleware,
