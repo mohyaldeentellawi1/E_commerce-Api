@@ -18,15 +18,14 @@ exports.createBrandValidator = [
       req.body.slug = slugify(val);
       return true;
     })
-    .custom((val) => {
-      const brand = BrandModel.findOne({ name: val });
-      if (brand) {
-        return Promise.reject(
-          new ApiError("Brand with this name already exists", 400)
-        );
-      }
-      return true;
-    }),
+    .custom(async (val) =>
+      BrandModel.findOne({ name: val }).then((brand) => {
+        if (brand) {
+          return Promise.reject(new ApiError("Brand already exists", 400));
+        }
+        return true;
+      })
+    ),
   validatorMiddleware,
 ];
 

@@ -18,15 +18,14 @@ exports.createCategoryValidator = [
       req.body.slug = slugify(val);
       return true;
     })
-    .custom((val) => {
-      const category = CategoryModel.findOne({ name: val });
-      if (category) {
-        return Promise.reject(
-          new ApiError("Category with this name already exists", 400)
-        );
-      }
-      return true;
-    }),
+    .custom(async (val) =>
+      CategoryModel.findOne({ name: val }).then((category) => {
+        if (category) {
+          return Promise.reject(new ApiError("Category already exists", 400));
+        }
+        return true;
+      })
+    ),
   validatorMiddleware,
 ];
 
