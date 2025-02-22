@@ -84,6 +84,17 @@ productSchema.virtual("reviews", {
   localField: "_id",
 });
 
+productSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "subcategories",
+    select: "name",
+  }).populate({
+    path: "brand",
+    select: "name",
+  });
+  next();
+});
+
 // update , delete, get , getALL
 productSchema.post("init", (doc) => {
   if (doc.imageCover && !doc.imageCover.includes("http")) {
