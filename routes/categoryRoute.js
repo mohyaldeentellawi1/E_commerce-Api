@@ -7,8 +7,8 @@ const {
   getCategory,
   updateCategory,
   deleteCategory,
-  uploadCategoryImage,
   imageProcessing,
+  // uploadCategoryImage,
 } = require("../services/categorySevices");
 const {
   getCategoryValidator,
@@ -29,7 +29,6 @@ router
   .post(
     protect,
     allowTo("admin"),
-    uploadCategoryImage,
     imageProcessing,
     createCategoryValidator,
     createCategory
@@ -40,7 +39,6 @@ router
   .put(
     protect,
     allowTo("admin"),
-    uploadCategoryImage,
     imageProcessing,
     updateCategoryValidator,
     updateCategory
