@@ -22,7 +22,7 @@ const BrandSchema = new mongoose.Schema(
 
 // update , delete, get , getALL
 BrandSchema.post("init", (doc) => {
-  if (doc.image) {
+  if (doc.image && !doc.image.includes("http")) {
     const imageUrl = `${process.env.BASE_URL}/brands/${doc.image}`;
     doc.image = imageUrl;
   }
@@ -30,7 +30,7 @@ BrandSchema.post("init", (doc) => {
 
 // create
 BrandSchema.post("save", (doc) => {
-  if (doc.image) {
+  if (doc.image && !doc.image.includes("http")) {
     const imageUrl = `${process.env.BASE_URL}/brands/${doc.image}`;
     doc.image = imageUrl;
   }

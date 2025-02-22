@@ -5,7 +5,7 @@ const factory = require("./handlersFactory");
 const ApiError = require("../utils/apiError");
 const CategoryM = require("../models/categoryModel");
 const cloudinary = require("../middleware/uploadImagewithCloudinary");
-// const { uploadSingleImage } = require("../middleware/uploadImageMiddleware");
+const { uploadSingleImage } = require("../middleware/uploadImageMiddleware");
 
 // @desc   Get all categories
 // @route  GET /api/v1/categories
@@ -33,10 +33,10 @@ exports.updateCategory = factory.updateOne(CategoryM);
 exports.deleteCategory = factory.deleteOne(CategoryM);
 
 //upload category image
-// exports.uploadCategoryImage = uploadSingleImage("image"); // for local storage
+exports.uploadCategoryImage = uploadSingleImage("image");
 
-// //image processing for local storage
-// exports.imageProcessing = asyncHandler(async (req, res, next) => {
+//image processing for local storage
+//exports.imageProcessing = asyncHandler(async (req, res, next) => {
 //   const fileName = `category-${uuidv4()}-${Date.now()}.jpeg`;
 //   if (req.file) {
 //     await sharp(req.file.buffer)
@@ -57,24 +57,25 @@ exports.imageProcessing = asyncHandler(async (req, res, next) => {
     const buffer = await sharp(req.file.buffer)
       .resize(600, 600)
       .toFormat("jpeg")
-      .jpeg({ quality: 90 })
+      .jpeg({ quality: 100 })
       .toBuffer();
-    const uploadResponse = await cloudinary.uploader.upload_stream(
-      {
-        folder: "categories",
-        public_id: fileName,
-        resource_type: "image",
-      },
-      (error, result) => {
-        if (error) {
-          console.error("Cloudinary Upload Error:", error);
-          return next(new ApiError("Image upload failed", 500));
+    await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "categories",
+          public_id: fileName,
+          resource_type: "image",
+        },
+        (error, result) => {
+          if (error) {
+            return reject(new ApiError("Image upload failed", 500));
+          }
+          req.body.image = result.secure_url;
+          resolve();
         }
-        req.body.image = result.secure_url;
-        next();
-      }
-    );
-    uploadResponse.end(buffer);
+      );
+      uploadStream.end(buffer);
+    });
   }
   next();
 });

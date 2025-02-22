@@ -97,7 +97,7 @@ UserSchema.pre("findOneAndDelete", async function (next) {
 
 // update , delete, get , getALL
 UserSchema.post("init", (doc) => {
-  if (doc.profileImage) {
+  if (doc.profileImage && !doc.profileImage.includes("http")) {
     const imageUrl = `${process.env.BASE_URL}/users/${doc.profileImage}`;
     doc.profileImage = imageUrl;
   }
@@ -105,7 +105,7 @@ UserSchema.post("init", (doc) => {
 
 // create
 UserSchema.post("save", (doc) => {
-  if (doc.profileImage) {
+  if (doc.profileImage && !doc.profileImage.includes("http")) {
     const imageUrl = `${process.env.BASE_URL}/users/${doc.profileImage}`;
     doc.profileImage = imageUrl;
   }

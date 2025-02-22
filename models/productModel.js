@@ -86,15 +86,19 @@ productSchema.virtual("reviews", {
 
 // update , delete, get , getALL
 productSchema.post("init", (doc) => {
-  if (doc.imageCover) {
+  if (doc.imageCover && !doc.imageCover.includes("http")) {
     const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
     doc.imageCover = imageUrl;
   }
   if (doc.images) {
     const imagelist = [];
     doc.images.forEach((image) => {
-      const imageUrl = `${process.env.BASE_URL}/products/${image}`;
-      imagelist.push(imageUrl);
+      if (!image.includes("http")) {
+        const imageUrl = `${process.env.BASE_URL}/products/${image}`;
+        imagelist.push(imageUrl);
+      } else {
+        imagelist.push(image);
+      }
     });
     doc.images = imagelist;
   }
@@ -102,17 +106,21 @@ productSchema.post("init", (doc) => {
 
 // create
 productSchema.post("save", (doc) => {
-  if (doc.imageCover) {
+  if (doc.imageCover && !doc.imageCover.includes("http")) {
     const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
     doc.imageCover = imageUrl;
   }
   if (doc.images) {
-    const imageList = [];
+    const imagelist = [];
     doc.images.forEach((image) => {
-      const imageUrl = `${process.env.BASE_URL}/products/${image}`;
-      imageList.push(imageUrl);
+      if (!image.includes("http")) {
+        const imageUrl = `${process.env.BASE_URL}/products/${image}`;
+        imagelist.push(imageUrl);
+      } else {
+        imagelist.push(image);
+      }
     });
-    doc.images = imageList;
+    doc.images = imagelist;
   }
 });
 

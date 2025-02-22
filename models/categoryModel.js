@@ -22,7 +22,7 @@ const categorySchema = new mongoose.Schema(
 
 // update , delete, get , getALL
 categorySchema.post("init", (doc) => {
-  if (doc.image) {
+  if (doc.image && !doc.image.includes("http")) {
     const imageUrl = `${process.env.BASE_URL}/categories/${doc.image}`;
     doc.image = imageUrl;
   }
@@ -30,7 +30,7 @@ categorySchema.post("init", (doc) => {
 
 // create
 categorySchema.post("save", (doc) => {
-  if (doc.image) {
+  if (doc.image && !doc.image.includes("http")) {
     const imageUrl = `${process.env.BASE_URL}/categories/${doc.image}`;
     doc.image = imageUrl;
   }
