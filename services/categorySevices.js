@@ -52,7 +52,7 @@ exports.uploadCategoryImage = uploadSingleImage("image");
 
 //image processing
 exports.imageProcessing = asyncHandler(async (req, res, next) => {
-  const fileName = `category-${uuidv4()}-${Date.now()}.jpeg`;
+  const fileName = `category-${uuidv4()}-${Date.now()}`;
   if (req.file) {
     const buffer = await sharp(req.file.buffer)
       .resize(600, 600)

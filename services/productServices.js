@@ -15,7 +15,7 @@ exports.uploadProductImages = uploadMultipleImages([
 // @desc   Image processing for image cover and images for product with cloudinary
 exports.productImageProcessing = asyncHandler(async (req, res, next) => {
   if (req.files.imageCover) {
-    const imageCoverFileName = `product-${uuidv4()}-${Date.now()}-cover.jpeg`;
+    const imageCoverFileName = `product-${uuidv4()}-${Date.now()}-cover`;
     const imageCoverBuffer = await sharp(req.files.imageCover[0].buffer)
       .resize(2000, 1333)
       .toFormat("jpeg")
@@ -43,7 +43,7 @@ exports.productImageProcessing = asyncHandler(async (req, res, next) => {
     req.body.images = [];
     await Promise.all(
       req.files.images.map(async (image, index) => {
-        const imageName = `product-${uuidv4()}-${Date.now()}-${index + 1}.jpeg`;
+        const imageName = `product-${uuidv4()}-${Date.now()}-${index + 1}`;
 
         const imageBuffer = await sharp(image.buffer)
           .resize(2000, 1333)

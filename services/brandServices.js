@@ -51,7 +51,7 @@ exports.uploadBrandImage = uploadSingleImage("image");
 
 //image processing for cloudinary
 exports.imageProcessing = asyncHandler(async (req, res, next) => {
-  const fileName = `brand-${uuidv4()}-${Date.now()}.jpeg`;
+  const fileName = `brand-${uuidv4()}-${Date.now()}`;
   if (req.file) {
     const buffer = await sharp(req.file.buffer)
       .resize(600, 600)
