@@ -61,6 +61,14 @@ reviewSchema.statics.calcAvgRatingAndQuantity = async function (productId) {
   }
 };
 
+reviewSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "user",
+    select: "name",
+  });
+  next();
+});
+
 reviewSchema.post("save", async function () {
   await this.constructor.calcAvgRatingAndQuantity(this.product);
 });

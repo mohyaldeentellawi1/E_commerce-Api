@@ -77,13 +77,13 @@ const OrderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-OrderSchema.pre(/^find^/, function (next) {
+OrderSchema.pre(/^find/, function (next) {
   this.populate({
     path: "user",
     select: "name progileImage email phone",
   }).populate({
     path: "cartItems.product",
-    select: "name price imageCover -category",
+    select: "name price imageCover",
   });
   next();
 });
