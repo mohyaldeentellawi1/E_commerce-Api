@@ -11,9 +11,9 @@ class ApiFeatures {
     excludedFields.forEach((field) => delete queryStringObj[field]);
     let queryString = JSON.stringify(queryStringObj);
     queryString = queryString.replace(
-      /\b(gte|gt|lte|lt)\b/g,
+      /\b(gte|gt|lte|lt|in)\b/g,
       (match) => `$${match}`
-    ); // add $ sign before gte, gt, lte, lt
+    ); // add $ sign before gte, gt, lte, lt , in
     this.mongooseQuery = this.mongooseQuery.find(JSON.parse(queryString));
     return this;
   }
