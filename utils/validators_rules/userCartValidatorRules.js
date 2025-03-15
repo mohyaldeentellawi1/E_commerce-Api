@@ -16,19 +16,17 @@ exports.addToCartValidator = [
       }
       return true;
     }),
-  check("color")
-    .notEmpty()
-    .withMessage("Color is required")
-    .custom(async (val, { req }) => {
-      const { productId } = req.body;
-      const product = await ProductModel.findById(productId);
-      if (!product.colors.includes(val)) {
-        return Promise.reject(
-          new ApiError(`Color ${val} is not available`, 403)
-        );
-      }
-      return true;
-    }),
+  check("color").custom(async (val, { req }) => {
+    const { productId } = req.body;
+    const product = await ProductModel.findById(productId);
+    if (product.colors.length > 0 && val === "") {
+      return Promise.reject(new ApiError("Color is required", 403));
+    }
+    if (product.colors.length > 0 && !product.colors.includes(val)) {
+      return Promise.reject(new ApiError(`Color ${val} is not available`, 403));
+    }
+    return true;
+  }),
   validatorMiddleware,
 ];
 

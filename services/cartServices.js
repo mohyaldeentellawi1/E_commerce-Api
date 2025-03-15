@@ -24,6 +24,7 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
   if (product.quantity === 0) {
     return next(new ApiError("Product is out of stock", 400));
   }
+
   let cart = await CartModel.findOne({ user: req.user._id });
   if (!cart) {
     cart = await CartModel.create({
@@ -41,6 +42,7 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
     const productIndex = cart.cartItems.findIndex(
       (item) => item.product.toString() === productId && item.color === color
     );
+    console.log(productIndex);
     if (productIndex > -1) {
       const cartItem = cart.cartItems[productIndex];
       cartItem.quantity += 1;
@@ -55,13 +57,13 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
       });
     }
   }
-
   calcTotalCartPrice(cart);
   await cart.save();
   res.status(200).json({
     success: true,
     message: "Product added to cart successfully",
     data: cart,
+    numberOfItems: cart.cartItems.length,
   });
 });
 
@@ -69,14 +71,18 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
 // @route  GET /api/v1/cart
 // @access Private (User)
 exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
-  const cart = await CartModel.findOne({ user: req.user._id });
+  const cart = await CartModel.findOne({ user: req.user._id }).populate({
+    path: "cartItems.product",
+    select: "title imageCover",
+  });
   if (!cart) {
     return next(new ApiError("Cart not found for this user", 404));
   }
   res.status(200).json({
     success: true,
-    message: "Cart retrieved successfully",
+    message: "Cart fetched successfully",
     data: cart,
+    numberOfItems: cart.cartItems.length,
   });
 });
 
@@ -99,6 +105,7 @@ exports.removeItemFromCart = asyncHandler(async (req, res, next) => {
     success: true,
     message: "Product removed from cart successfully",
     data: cart,
+    numberOfItems: cart.cartItems.length,
   });
 });
 
@@ -139,6 +146,7 @@ exports.updateQuantityForItem = asyncHandler(async (req, res, next) => {
     success: true,
     message: "Cart updated successfully",
     data: cart,
+    numberOfItems: cart.cartItems.length,
   });
 });
 
