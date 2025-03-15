@@ -78,6 +78,10 @@ exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
   if (!cart) {
     return next(new ApiError("Cart not found for this user", 404));
   }
+
+  cart.cartItems = cart.cartItems.filter((item) => item.product !== null);
+  calcTotalCartPrice(cart);
+  await cart.save();
   res.status(200).json({
     success: true,
     message: "Cart fetched successfully",
