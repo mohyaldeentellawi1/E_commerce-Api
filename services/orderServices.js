@@ -42,7 +42,7 @@ exports.createNewOrder = asyncHandler(async (req, res, next) => {
     await CartModel.findByIdAndDelete(req.params.cartId);
   }
   res.status(201).json({
-    status: true,
+    success: true,
     message: "Order created successfully",
     data: order,
   });
@@ -72,7 +72,7 @@ exports.getOrder = asyncHandler(async (req, res, next) => {
     (user.role === "user" && order.user._id.toString() === user._id.toString())
   ) {
     res.status(200).json({
-      status: true,
+      success: true,
       message: "Order fetched successfully",
       data: order,
     });
@@ -93,7 +93,7 @@ exports.updateOrderPaidStatus = asyncHandler(async (req, res, next) => {
   order.paidAt = Date.now();
   await order.save();
   res.status(200).json({
-    status: true,
+    success: true,
     message: "Order Paid Status updated successfully",
     data: order,
   });
@@ -111,7 +111,7 @@ exports.updateOrderDeliverStatus = asyncHandler(async (req, res, next) => {
   order.deliveredAt = Date.now();
   await order.save();
   res.status(200).json({
-    status: true,
+    success: true,
     message: "Order was successfully delivered",
     data: order,
   });
@@ -155,7 +155,7 @@ exports.checkoutSession = asyncHandler(async (req, res, next) => {
     metadata: req.body.shippingAddress,
   });
   res.status(200).json({
-    status: true,
+    success: true,
     message: "Checkout session created successfully",
     data: session,
   });

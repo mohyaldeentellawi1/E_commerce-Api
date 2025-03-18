@@ -39,9 +39,12 @@ exports.updateAddressValidator = [
     .withMessage("Invalid Address Id")
     .notEmpty()
     .withMessage("Address Id is required")
-    .custom(async (addressId, { req }) => {
+    .custom(async (val, { req }) => {
       const user = await UserModel.findById(req.user._id);
-      if (!user.addresses.includes(addressId)) {
+      const address = user.addresses.find(
+        (item) => item._id.toString() === val
+      );
+      if (!address) {
         return Promise.reject(
           new ApiError("Address not found in user's addresses", 404)
         );
@@ -67,19 +70,44 @@ exports.updateAddressValidator = [
   validatorMiddleware,
 ];
 
-exports.deleteAddressValidator = [
+exports.getAddressByIdValidator = [
   check("addressId")
     .isMongoId()
     .withMessage("Invalid Address Id")
     .notEmpty()
     .withMessage("Address Id is required")
-    .custom(async (addressId, { req }) => {
+    .custom(async (val, { req }) => {
       const user = await UserModel.findById(req.user._id);
-      if (!user.addresses.includes(addressId)) {
+      const address = user.addresses.find(
+        (item) => item._id.toString() === val
+      );
+      if (!address) {
         return Promise.reject(
           new ApiError("Address not found in user's addresses", 404)
         );
       }
       return true;
     }),
+  validatorMiddleware,
+];
+
+exports.deleteAddressValidator = [
+  check("addressId")
+    .isMongoId()
+    .withMessage("Invalid Address Id")
+    .notEmpty()
+    .withMessage("Address Id is required")
+    .custom(async (val, { req }) => {
+      const user = await UserModel.findById(req.user._id);
+      const address = user.addresses.find(
+        (item) => item._id.toString() === val
+      );
+      if (!address) {
+        return Promise.reject(
+          new ApiError("Address not found in user's addresses", 404)
+        );
+      }
+      return true;
+    }),
+  validatorMiddleware,
 ];

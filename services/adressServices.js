@@ -6,7 +6,7 @@ const UserModel = require("../models/userModel");
 // @route  POST /api/v1/adresses
 // @access Private (User)
 exports.addAddress = asyncHandler(async (req, res, next) => {
-  const user = await UserModel.findByIdAndUpdate(
+  await UserModel.findByIdAndUpdate(
     req.user._id,
     { $addToSet: { addresses: req.body } },
     { new: true }
@@ -14,7 +14,6 @@ exports.addAddress = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Address added successfully",
-    data: user.addresses,
   });
 });
 
@@ -22,7 +21,7 @@ exports.addAddress = asyncHandler(async (req, res, next) => {
 // @route  DELETE /api/v1/adresses/:addressId
 // @access Private (User)
 exports.removeAddress = asyncHandler(async (req, res, next) => {
-  const user = await UserModel.findByIdAndUpdate(
+  await UserModel.findByIdAndUpdate(
     req.user._id,
     { $pull: { addresses: { _id: req.params.addressId } } },
     { new: true }
@@ -30,7 +29,6 @@ exports.removeAddress = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Address removed successfully",
-    data: user.addresses,
   });
 });
 
@@ -44,6 +42,23 @@ exports.getLoggedUserAddresses = asyncHandler(async (req, res, next) => {
     message: "User's addresses fetched successfully",
     result: user.addresses.length,
     data: user.addresses,
+  });
+});
+
+// @desc   Get Address by ID from the User adresses list
+// @route  GET /api/v1/addresses/:addressId
+// @access Private (User)
+exports.getAddressById = asyncHandler(async (req, res, next) => {
+  const userAddresses = await UserModel.findById(req.user._id).populate(
+    "addresses"
+  );
+  const address = userAddresses.addresses.find(
+    (item) => item._id.toString() === req.params.addressId
+  );
+  res.status(200).json({
+    success: true,
+    message: "Address fetched successfully",
+    data: address,
   });
 });
 
