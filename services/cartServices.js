@@ -42,7 +42,6 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
     const productIndex = cart.cartItems.findIndex(
       (item) => item.product.toString() === productId && item.color === color
     );
-    console.log(productIndex);
     if (productIndex > -1) {
       const cartItem = cart.cartItems[productIndex];
       cartItem.quantity += 1;
