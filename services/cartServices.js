@@ -33,8 +33,14 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
         {
           product: productId,
           color,
-          price: product.price,
-          totalItemPrice: product.price,
+          price:
+            product.priceAfterDiscount > 0
+              ? product.priceAfterDiscount
+              : product.price,
+          totalItemPrice:
+            product.priceAfterDiscount > 0
+              ? product.priceAfterDiscount
+              : product.price,
         },
       ],
     });
@@ -51,7 +57,10 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
       cart.cartItems.push({
         product: productId,
         color,
-        price: product.price,
+        price:
+          product.priceAfterDiscount > 0
+            ? product.priceAfterDiscount
+            : product.price,
         totalItemPrice: product.price,
       });
     }
