@@ -21,9 +21,31 @@ const calcTotalCartPrice = (cart) => {
 exports.addToCart = asyncHandler(async (req, res, next) => {
   const { productId, color } = req.body;
   const product = await ProductModel.findById(productId);
+
+  if (!product) {
+    return next(new ApiError("Product not found", 404));
+  }
+
   if (product.quantity === 0) {
     return next(new ApiError("Product is out of stock", 400));
   }
+
+  if (product.colors.length > 0 && color === "") {
+    return next(new ApiError("Color is required", 403));
+  }
+
+  if (product.colors.length > 0 && !product.colors.includes(color)) {
+    return next(new ApiError(`Color ${color} is not available`, 403));
+  }
+
+  if (product.colors.length === 0 && color !== "") {
+    return next(new ApiError("This product doesn't have colors", 403));
+  }
+
+  const finalPrice =
+    product.priceAfterDiscount && product.priceAfterDiscount > 0
+      ? product.priceAfterDiscount
+      : product.price;
 
   let cart = await CartModel.findOne({ user: req.user._id });
   if (!cart) {
@@ -33,14 +55,9 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
         {
           product: productId,
           color,
-          price:
-            product.priceAfterDiscount > 0
-              ? product.priceAfterDiscount
-              : product.price,
-          totalItemPrice:
-            product.priceAfterDiscount > 0
-              ? product.priceAfterDiscount
-              : product.price,
+          price: finalPrice,
+          quantity: 1,
+          totalItemPrice: finalPrice,
         },
       ],
     });
@@ -57,11 +74,9 @@ exports.addToCart = asyncHandler(async (req, res, next) => {
       cart.cartItems.push({
         product: productId,
         color,
-        price:
-          product.priceAfterDiscount > 0
-            ? product.priceAfterDiscount
-            : product.price,
-        totalItemPrice: product.price,
+        price: finalPrice,
+        quantity: 1,
+        totalItemPrice: finalPrice,
       });
     }
   }
@@ -83,6 +98,7 @@ exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
     path: "cartItems.product",
     select: "title imageCover",
   });
+
   if (!cart) {
     return next(new ApiError("Cart not found for this user", 404));
   }
@@ -106,13 +122,17 @@ exports.removeItemFromCart = asyncHandler(async (req, res, next) => {
   const cart = await CartModel.findOneAndUpdate(
     { user: req.user._id },
     { $pull: { cartItems: { _id: req.params.itemId } } },
-    { new: true }
+    { new: true, runValidators: true }
   );
+
   if (!cart) {
     return next(new ApiError("Cart not found for this user", 404));
   }
+
   calcTotalCartPrice(cart);
+
   await cart.save();
+
   res.status(200).json({
     success: true,
     message: "Product removed from cart successfully",
@@ -125,7 +145,12 @@ exports.removeItemFromCart = asyncHandler(async (req, res, next) => {
 // @route  DELETE /api/v1/cart/
 // @access Private (User)
 exports.clearUserCart = asyncHandler(async (req, res, next) => {
-  await CartModel.findOneAndDelete({ user: req.user._id });
+  const cart = await CartModel.findOneAndDelete({ user: req.user._id });
+
+  if (!cart) {
+    return next(new ApiError("Cart already is cleared", 404));
+  }
+
   res.status(200).json({
     success: true,
     message: "Cart cleared successfully",
@@ -138,21 +163,39 @@ exports.clearUserCart = asyncHandler(async (req, res, next) => {
 exports.updateQuantityForItem = asyncHandler(async (req, res, next) => {
   const { quantity } = req.body;
   const cart = await CartModel.findOne({ user: req.user._id });
+
   if (!cart) {
     return next(new ApiError("Cart not found for this user", 404));
   }
+
   const itemIndex = cart.cartItems.findIndex(
     (item) => item._id.toString() === req.params.itemId
   );
-  if (itemIndex > -1) {
-    const cartItem = cart.cartItems[itemIndex];
-    cartItem.quantity = quantity;
-    cartItem.totalItemPrice = cartItem.price * quantity;
-    cart.cartItems[itemIndex] = cartItem;
-  } else {
+
+  if (itemIndex === -1) {
     return next(new ApiError("Item not found in cart", 404));
   }
+
+  const cartItem = cart.cartItems[itemIndex];
+
+  const product = await ProductModel.findById(cartItem.product);
+
+  if (!product) {
+    return next(new ApiError("Product not found", 404));
+  }
+
+  if (quantity > product.quantity) {
+    return next(
+      new ApiError(`Only ${product.quantity} items available in stock`, 400)
+    );
+  }
+
+  cartItem.quantity = quantity;
+  cartItem.totalItemPrice = cartItem.price * quantity;
+  cart.cartItems[itemIndex] = cartItem;
+
   calcTotalCartPrice(cart);
+
   await cart.save();
   res.status(200).json({
     success: true,
