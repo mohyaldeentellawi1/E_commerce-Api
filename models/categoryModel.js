@@ -20,6 +20,8 @@ const categorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+categorySchema.index({ name: 1 });
+
 // update , delete, get , getALL
 categorySchema.post("init", (doc) => {
   if (doc.image && !doc.image.includes("http")) {

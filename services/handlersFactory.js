@@ -60,8 +60,8 @@ exports.getAll = (Model, modelName = "") =>
     if (req.filterObj) {
       filter = req.filterObj;
     }
-    const countDocuments = await Model.countDocuments();
-
+    //const countDocuments = await Model.countDocuments();
+    const countDocuments = await Model.estimatedDocumentCount();
     // Build query
     const apiFeatures = new ApiFeatures(Model.find(filter), req.query)
       .filter()
