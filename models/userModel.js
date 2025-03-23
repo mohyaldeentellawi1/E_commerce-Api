@@ -74,8 +74,6 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-UserSchema.index({ name: 1 });
-
 // For HashPassword
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

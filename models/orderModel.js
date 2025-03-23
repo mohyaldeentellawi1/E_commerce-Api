@@ -77,9 +77,6 @@ const OrderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-OrderSchema.index({ name: 1 });
-OrderSchema.index({ user: 1 });
-
 OrderSchema.pre(/^find/, function (next) {
   this.populate({
     path: "user",

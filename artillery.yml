@@ -27,4 +27,4 @@ config:
 scenarios:
   - flow:
       - get:
-          url: "/api/v1/categories"
+          url: "/api/v1/subCategory"
