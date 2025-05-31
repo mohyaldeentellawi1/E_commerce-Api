@@ -74,9 +74,9 @@ app.all("*", (req, res, next) => {
 // Global Error Handler Middleware for express
 app.use(globalError);
 
-const { PORT } = process.env;
-const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+const port = process.env.PORT || 3000;
+const server = app.listen(port, () => {
+  console.log(`✅ Server is running on port ${port}`);
 });
 
 // Handle rejection error outside of express
